@@ -27,7 +27,7 @@ for that of event display (mind the order of `display.py` and `-h`!). For more d
 After generating MC samples with `DSimu` in the DarkSHINE simulation framework, assign a large number (e.g. 999999) to the option `RecECAL.Advance` in the configuration file for `DAna`. Then run `DAna`, and the original hit information will be stored in the branch `ECAL_ECell_XYZ`.
 
 ### Selecting Hits
-The desired hit information are in the form of `Hit_X`, `Hit_Y`, etc, which should be converted from `ECAL_ECell_XYZ`. To achieve this, run
+The desired hit information are in the form of `Hit_X`, `Hit_Y`, etc., which should be converted from `ECAL_ECell_XYZ`. To achieve this, run
 ```shell
 iHit -s -f [file]
 ```

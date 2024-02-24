@@ -414,6 +414,38 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         else
             return Ecell_max_9 / Ecell_max_49;
     }, {"Ecell_max_9", "Ecell_max_49", "nhits"})
+    // Energy deposition of the cell with largest energy deposition, divided by total energy deposition
+    .Define("E1Edep", [] (Double_t Ecell_max, Double_t Edep, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return Ecell_max / Edep;
+    }, {"Ecell_max", "Edep", "nhits"})
+    // Energy deposition of the central 3*3 cells divided by the total energy deposition
+    .Define("E9Edep", [] (Double_t Ecell_max_9, Double_t Edep, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return Ecell_max_9 / Edep;
+    }, {"Ecell_max_9", "Edep", "nhits"})
+    // Energy deposition of the central 5*5 cells divided by the total energy deposition
+    .Define("E25Edep", [] (Double_t Ecell_max_25, Double_t Edep, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return Ecell_max_25 / Edep;
+    }, {"Ecell_max_25", "Edep", "nhits"})
+    // Energy deposition of the central 7*7 cells divided by the total energy deposition
+    .Define("E49Edep", [] (Double_t Ecell_max_49, Double_t Edep, Int_t nhits)
+    {
+        if (nhits == 0)
+            return 0.0;
+        else
+            return Ecell_max_49 / Edep;
+    }, {"Ecell_max_49", "Edep", "nhits"})
     // RMS value of the positions of all the hits on a layer
     .Define("layer_rms", [] (vector<Double_t> Hit_X, vector<Double_t> Hit_Y, vector<Int_t> layer, vector<Double_t> Hit_Energy, Int_t nhits, Double_t COG_X_mean, Double_t COG_Y_mean)->vector<Double_t>
     {

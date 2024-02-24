@@ -133,8 +133,12 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_COG_Z_mean;
 
     Float_t  bdt_E1E9;
+    Float_t  bdt_E1Edep;
+    Float_t  bdt_E25Edep;
+    Float_t  bdt_E49Edep;
     Float_t  bdt_E9E25;
     Float_t  bdt_E9E49;
+    Float_t  bdt_E9Edep;
     Float_t  bdt_Ecell_max;
     Float_t  bdt_Ecell_max_25;
     Float_t  bdt_Ecell_max_49;
@@ -228,8 +232,12 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     reader->AddVariable("COG_Z_mean",         &bdt_COG_Z_mean);
 
     reader->AddVariable("E1E9",               &bdt_E1E9);
+    reader->AddVariable("E1Edep",             &bdt_E1Edep);
+    reader->AddVariable("E25Edep",            &bdt_E25Edep);
+    reader->AddVariable("E49Edep",            &bdt_E49Edep);
     reader->AddVariable("E9E25",              &bdt_E9E25);
     reader->AddVariable("E9E49",              &bdt_E9E49);
+    reader->AddVariable("E9Edep",             &bdt_E9Edep);
     reader->AddVariable("Ecell_max",          &bdt_Ecell_max);
     reader->AddVariable("Ecell_max_25",       &bdt_Ecell_max_25);
     reader->AddVariable("Ecell_max_49",       &bdt_Ecell_max_49);
@@ -328,8 +336,12 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("COG_Z_mean");
 
     rdf_input.emplace_back("E1E9");
+    rdf_input.emplace_back("E1Edep");
+    rdf_input.emplace_back("E25Edep");
+    rdf_input.emplace_back("E49Edep");
     rdf_input.emplace_back("E9E25");
     rdf_input.emplace_back("E9E49");
+    rdf_input.emplace_back("E9Edep");
     rdf_input.emplace_back("Ecell_max");
     rdf_input.emplace_back("Ecell_max_25");
     rdf_input.emplace_back("Ecell_max_49");
@@ -423,8 +435,12 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 //         Double_t COG_Z_4_2,
          Double_t COG_Z_mean,
          Double_t E1E9,
+         Double_t E1Edep,
+         Double_t E25Edep,
+         Double_t E49Edep,
          Double_t E9E25,
          Double_t E9E49,
+         Double_t E9Edep,
          Double_t Ecell_max,
          Double_t Ecell_max_25,
          Double_t Ecell_max_49,
@@ -515,8 +531,12 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
         bdt_COG_Z_mean         = COG_Z_mean;
 
         bdt_E1E9               = E1E9;
+        bdt_E1Edep             = E1Edep;
+        bdt_E25Edep            = E25Edep;
+        bdt_E49Edep            = E49Edep;
         bdt_E9E25              = E9E25;
         bdt_E9E49              = E9E49;
+        bdt_E9Edep             = E9Edep;
         bdt_Ecell_max          = Ecell_max;
         bdt_Ecell_max_25       = Ecell_max_25;
         bdt_Ecell_max_49       = Ecell_max_49;

@@ -67,8 +67,12 @@ Int_t main(Int_t argc, Char_t* argv[])
         b->AddVar("COG_Z_mean",         'D');
 
         b->AddVar("E1E9",               'D');
+        b->AddVar("E1Edep",             'D');
+        b->AddVar("E25Edep",            'D');
+        b->AddVar("E49Edep",            'D');
         b->AddVar("E9E25",              'D');
         b->AddVar("E9E49",              'D');
+        b->AddVar("E9Edep",             'D');
         b->AddVar("Ecell_max",          'D');
         b->AddVar("Ecell_max_25",       'D');
         b->AddVar("Ecell_max_49",       'D');
@@ -148,18 +152,18 @@ Int_t main(Int_t argc, Char_t* argv[])
         b->AddVar("ywidth",             'D');
         b->AddVar("zdepth",             'D');
 
-        const Int_t energy_points = 100;
+        const Int_t energy_points = 200;
         string path = "/lustre/collider/chenjiyuan/dss-pid/run/e-pi-/root/";
 
         for (Int_t i = 1; i <= energy_points; ++i)
         {
             // Signal
             b->AddTrainSig(path + "training/job" + to_string(i) + "_e-_" + to_string(10 * i) + "MeV/e-_" + to_string(10 * i) + "MeV.root", tree);
-            b->AddTestSig( path + "test/job" + to_string(200 + i) + "_e-_" + to_string(10 * i) + "MeV/e-_" + to_string(10 * i) + "MeV.root", tree);
+            b->AddTestSig( path + "test/job" + to_string(400 + i) + "_e-_" + to_string(10 * i) + "MeV/e-_" + to_string(10 * i) + "MeV.root", tree);
 
             // Background
-            b->AddTrainBkg(path + "training/job" + to_string(100 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
-            b->AddTestBkg( path + "test/job" + to_string(300 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
+            b->AddTrainBkg(path + "training/job" + to_string(200 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
+            b->AddTestBkg( path + "test/job" + to_string(600 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
         }
 
         b->TrainBDT();
