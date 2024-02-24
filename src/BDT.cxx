@@ -63,8 +63,8 @@ Int_t BDT::TrainBDT()
         dataloader->AddBackgroundTree(l, 1.0, TMVA::Types::kTesting);
 
     // Add different cuts for signal and background events here
-    TCut cut_sig = "";
-    TCut cut_bkg = "";
+    TCut cut_sig = "nhits > 0";
+    TCut cut_bkg = "nhits > 0";
 
     dataloader->PrepareTrainingAndTestTree( cut_sig, cut_bkg, "SplitMode=Random:NormMode=NumEvents:!V" );
 
