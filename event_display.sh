@@ -1,15 +1,15 @@
 #! /bin/bash
 source /home/chenjiyuan/conda.env
 
-energy=990
-particle="pi-"
+energy=400
+particle="e-"
 
 if [ $particle = "e-" ]
 then
     job=$((energy / 10))
 elif [ $particle = "pi-" ]
 then
-    job=$((energy / 10 + 100))
+    job=$((energy / 10 + 200))
 fi
 
 filename="/lustre/collider/chenjiyuan/dss-pid/run/e-pi-/root/training/job${job}_${particle}_${energy}MeV/hit_sel_${particle}_${energy}MeV_ana.root"
