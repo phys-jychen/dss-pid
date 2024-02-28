@@ -90,13 +90,13 @@ def plot(fname: str, tree: str, event_index: int, title: str):
 
     fig.suptitle(title, size='xx-large')
     ax.invert_xaxis()
-    ax.set_xlabel("X [cm]")
-    ax.set_ylabel("Z [layer]")
-    ax.set_zlabel("Y [cm]")
+    ax.set_xlabel("X [cm]", size='x-large')
+    ax.set_ylabel("Z [layer]", size='x-large')
+    ax.set_zlabel("Y [cm]", size='x-large')
 
     m = plt.cm.ScalarMappable(cmap=cmap)
     m.set_array(energy)
-    plt.colorbar(m, pad=0.2, label="Hit Energy [MeV]")
+    plt.colorbar(m, pad=0.2, ax=plt.gca()).set_label(label="Hit Energy [MeV]", size='x-large')
 
     ax.view_init(elev=20, azim=-35, roll=0)
 
