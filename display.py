@@ -12,8 +12,6 @@ LayerThick = 4.0
 nCellX = 21
 nCellY = 21
 nLayer = 11
-WidthX = (nCellX + 1) * CellWidthX
-WidthY = (nCellY + 1) * CellWidthY
 
 
 def read_file(fname: str, tree: str, event_index: int):
@@ -38,11 +36,15 @@ def read_file(fname: str, tree: str, event_index: int):
 
         for i in np.arange(len(z)):
             if z[i] % 2 == 0:
-                x[i] = np.round((xtemp[i] - 0.25 * CellWidthX) / CellWidthX).astype(int)
-                y[i] = np.round((ytemp[i] - 0.25 * CellWidthY) / CellWidthY).astype(int)
+                x[i] = np.round(xtemp[i] / CellWidthX - 0.25).astype(int)
+                y[i] = np.round(ytemp[i] / CellWidthY - 0.25).astype(int)
+#                if abs(xtemp[i] / CellWidthX - 0.25) >= 10 or abs(ytemp[i] / CellWidthY - 0.25) >= 10:
+#                    print(xtemp[i] / CellWidthX - 0.25, ytemp[i] / CellWidthY - 0.25)
             else:
-                x[i] = np.round((xtemp[i] + 0.25 * CellWidthX) / CellWidthX).astype(int)
-                y[i] = np.round((ytemp[i] + 0.25 * CellWidthY) / CellWidthY).astype(int)
+                x[i] = np.round(xtemp[i] / CellWidthX + 0.25).astype(int)
+                y[i] = np.round(ytemp[i] / CellWidthY + 0.25).astype(int)
+#                if abs(xtemp[i] / CellWidthX + 0.25) >= 10 or abs(ytemp[i] / CellWidthY + 0.25) >= 10:
+#                    print(xtemp[i] / CellWidthX + 0.25, ytemp[i] / CellWidthY + 0.25)
 
         znew, ynew, xnew, enew = (np.array(a) for a in zip(*sorted(zip(z, y, x, energy), reverse = True)))
 
@@ -56,16 +58,20 @@ def plot(fname: str, tree: str, event_index: int, title: str):
     nhits = len(x)
 
     fig, ax = plt.subplots(subplot_kw={'projection': '3d'})
-    plt.gca().set_box_aspect((1, WidthX / (LayerThick * (nLayer + 1)), 1))
     cmap = cm.OrRd
+
+    WidthX = (nCellX + 0.5) * CellWidthX
+    WidthY = (nCellY + 0.5) * CellWidthY
+
+    plt.gca().set_box_aspect((LayerThick * (nLayer + 1) / WidthX, 1, LayerThick * (nLayer + 1) / WidthY))
 
     for i in np.arange(nhits):
         if z[i] % 2 == 0:
+            xnew = np.arange(x[i] - 1, x[i] + 1) + 0.75
+            ynew = np.arange(y[i] - 1, y[i] + 1) + 0.75
+        else:
             xnew = np.arange(x[i] - 1, x[i] + 1) + 0.25
             ynew = np.arange(y[i] - 1, y[i] + 1) + 0.25
-        else:
-            xnew = np.arange(x[i] - 1, x[i] + 1) - 0.25
-            ynew = np.arange(y[i] - 1, y[i] + 1) - 0.25
 
         xnew, ynew = np.meshgrid(xnew, ynew)
         znew = z[i] * np.ones(xnew.shape)

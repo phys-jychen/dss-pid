@@ -1,8 +1,8 @@
 #! /bin/bash
 source /home/chenjiyuan/conda.env
 
-energy=400
-particle="e-"
+energy=2000
+particle="pi-"
 
 if [ $particle = "e-" ]
 then
@@ -14,7 +14,7 @@ fi
 
 filename="/lustre/collider/chenjiyuan/dss-pid/run/e-pi-/root/training/job${job}_${particle}_${energy}MeV/hit_sel_${particle}_${energy}MeV_ana.root"
 #tree=dp
-event_index=2024
+event_index=925
 save_dir="/lustre/collider/chenjiyuan/dss-pid/figs/"
 output="EventDisplay_${particle}_${energy}MeV.pdf"
 #show=0
