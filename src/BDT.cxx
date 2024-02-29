@@ -143,7 +143,10 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_Ecell_max_25;
     Float_t  bdt_Ecell_max_49;
     Float_t  bdt_Ecell_max_9;
+    Float_t  bdt_Ecell_second;
     Float_t  bdt_Edep;
+    Float_t  bdt_Emax_sec_diff;
+    Float_t  bdt_Emax_sec_dist;
     Float_t  bdt_Emean;
 
 //    Float_t  bdt_FD_2D_10;
@@ -242,7 +245,10 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     reader->AddVariable("Ecell_max_25",       &bdt_Ecell_max_25);
     reader->AddVariable("Ecell_max_49",       &bdt_Ecell_max_49);
     reader->AddVariable("Ecell_max_9",        &bdt_Ecell_max_9);
+    reader->AddVariable("Ecell_second",       &bdt_Ecell_second);
     reader->AddVariable("Edep",               &bdt_Edep);
+    reader->AddVariable("Emax_sec_diff",      &bdt_Emax_sec_diff);
+    reader->AddVariable("Emax_sec_dist",      &bdt_Emax_sec_dist);
     reader->AddVariable("Emean",              &bdt_Emean);
 
 //    reader->AddVariable("FD_2D_10",           &bdt_FD_2D_10);
@@ -346,7 +352,10 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("Ecell_max_25");
     rdf_input.emplace_back("Ecell_max_49");
     rdf_input.emplace_back("Ecell_max_9");
+    rdf_input.emplace_back("Ecell_second");
     rdf_input.emplace_back("Edep");
+    rdf_input.emplace_back("Emax_sec_diff");
+    rdf_input.emplace_back("Emax_sec_dist");
     rdf_input.emplace_back("Emean");
 
 //    rdf_input.emplace_back("FD_2D_10");
@@ -445,7 +454,10 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
          Double_t Ecell_max_25,
          Double_t Ecell_max_49,
          Double_t Ecell_max_9,
+         Double_t Ecell_second,
          Double_t Edep,
+         Double_t Emax_sec_diff,
+         Double_t Emax_sec_dist,
          Double_t Emean,
 //         Double_t FD_2D_10,
 //         Double_t FD_2D_100,
@@ -541,7 +553,10 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
         bdt_Ecell_max_25       = Ecell_max_25;
         bdt_Ecell_max_49       = Ecell_max_49;
         bdt_Ecell_max_9        = Ecell_max_9;
+        bdt_Ecell_second       = Ecell_second;
         bdt_Edep               = Edep;
+        bdt_Emax_sec_diff      = Emax_sec_diff;
+        bdt_Emax_sec_dist      = Emax_sec_dist;
         bdt_Emean              = Emean;
 
 //        bdt_FD_2D_10           = FD_2D_10;

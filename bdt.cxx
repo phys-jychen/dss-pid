@@ -77,7 +77,10 @@ Int_t main(Int_t argc, Char_t* argv[])
         b->AddVar("Ecell_max_25",       'D');
         b->AddVar("Ecell_max_49",       'D');
         b->AddVar("Ecell_max_9",        'D');
+        b->AddVar("Ecell_second",       'D');
         b->AddVar("Edep",               'D');
+        b->AddVar("Emax_sec_diff",      'D');
+        b->AddVar("Emax_sec_dist",      'D');
         b->AddVar("Emean",              'D');
 
         // FD_2D

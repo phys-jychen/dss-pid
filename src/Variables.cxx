@@ -1,9 +1,11 @@
 #include "Variables.h"
 
-const Double_t CellWidthX = 2.5, CellWidthY = 2.5;
+const Double_t CellWidthX = 2.5;
+const Double_t CellWidthY = 2.5;
 const Double_t Thick = 4.0;
 
-const Int_t nCellX = 21, nCellY = 21;
+const Int_t nCellX = 21;
+const Int_t nCellY = 21;
 const Int_t nLayer = 11;
 
 const Double_t BiasX = 0.5 * (nCellX - 1) * CellWidthX;
@@ -240,7 +242,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // RMS width in x direction (with respect to COGX)
     .Define("xwidth", [] (vector<Double_t> Hit_X, Double_t COG_X_mean)
     {
-        TH1D* h1 = new TH1D("h1", "", 100, -30, 30);
+        TH1D* h1 = new TH1D("h1", "", 120, -30, 30);
         for (Double_t i : Hit_X)
             h1->Fill(i - COG_X_mean);
         Double_t xwidth = h1->GetRMS();
@@ -250,7 +252,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // RMS width in y direction (with respect to COGY)
     .Define("ywidth", [] (vector<Double_t> Hit_Y, Double_t COG_Y_mean)
     {
-        TH1D* h1 = new TH1D("h1", "", 100, -30, 30);
+        TH1D* h1 = new TH1D("h1", "", 120, -30, 30);
         for (Double_t i : Hit_Y)
             h1->Fill(i - COG_Y_mean);
         Double_t ywidth = h1->GetRMS();
@@ -286,7 +288,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         }
         return Ecell;
     }, {"Hit_X", "Hit_Y", "layer", "Hit_Energy", "nhits"})
-    // The maximum energy deposition as well as the ID of the fired cells
+    // The maximum energy deposition as well as its ID
     .Define("Ecell_max_id", [] (vector<vector<Double_t>> Ecell, Int_t nhits)
     {
         vector<Double_t> Ecell_max_id = { (Double_t) nhits, 0.0 };
@@ -299,6 +301,45 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return Ecell_max_id;
     }, {"Ecell", "nhits"})
     .Define("Ecell_max", "Ecell_max_id[1]")
+    // The second largest energy deposition as well as its ID
+    .Define("Ecell_second_id", [] (vector<vector<Double_t>> Ecell, Int_t nhits, Double_t Ecell_max)
+    {
+        vector<Double_t> Ecell_second_id = { (Double_t) nhits, 0.0 };
+        for (Int_t i = 0; i < nhits; ++i)
+            if (Ecell.at(1).at(i) > Ecell_second_id.at(1) && Ecell.at(1).at(i) < Ecell_max)
+            {
+                Ecell_second_id.at(0) = Ecell.at(0).at(i);
+                Ecell_second_id.at(1) = Ecell.at(1).at(i);
+            }
+        return Ecell_second_id;
+    }, {"Ecell", "nhits", "Ecell_max"})
+    .Define("Ecell_second", "Ecell_second_id[1]")
+    .Define("Emax_sec_diff", "Ecell_max - Ecell_second")
+    // Distance between the cell with Ecell_max and the one with Ecell_second
+    .Define("Emax_sec_dist", [] (vector<Double_t> Ecell_max_id, vector<Double_t> Ecell_second_id)
+    {
+        Double_t Emax_sec_dist = 0.0;
+        Double_t x_max = ((Int_t) Ecell_max_id.at(0) % 10000) / 100 * CellWidthX;
+        Double_t y_max = (Int_t) Ecell_max_id.at(0) % 100 * CellWidthY;
+        Int_t z_max_temp = (Int_t) Ecell_max_id.at(0) / 10000;
+        Double_t z_max = z_max_temp * Thick;
+        if (z_max_temp % 2 == 0)
+        {
+            x_max += 0.5 * CellWidthX;
+            y_max += 0.5 * CellWidthY;
+        }
+        Double_t x_second = ((Int_t) Ecell_second_id.at(0) % 10000) / 100 * CellWidthX;
+        Double_t y_second = (Int_t) Ecell_second_id.at(0) % 100 * CellWidthY;
+        Int_t z_second_temp = (Int_t) Ecell_second_id.at(0) / 10000;
+        Double_t z_second = z_second_temp * Thick;
+        if (z_second_temp % 2 == 0)
+        {
+            x_second += 0.5 * CellWidthX;
+            y_second += 0.5 * CellWidthY;
+        }
+        Emax_sec_dist = Sqrt(Power(x_max - x_second, 2) + Power(y_max - y_second, 2) + Power(z_max - z_second, 2));
+        return Emax_sec_dist;
+    }, {"Ecell_max_id", "Ecell_second_id"})
     // The energy deposition in the 3*3 cells around the one with maximum energy deposition
     .Define("Ecell_max_9", [] (vector<vector<Double_t>> Ecell, vector<Double_t> Ecell_max_id)
     {
@@ -472,12 +513,12 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // The layer where the shower begins; otherwise it is set to be nLayer + 2
     .Define("shower_start", [] (vector<Int_t> hits_on_layer)
     {
-        Int_t shower_start = nLayer + 2;
-        const Int_t threshold = 4;
-        for (Int_t i = 0; i < nLayer - 3; ++i)
-            if (hits_on_layer.at(i) >= threshold && hits_on_layer.at(i + 1) >= threshold && hits_on_layer.at(i + 2) >= threshold && hits_on_layer.at(i + 3) >= threshold)
+        Int_t shower_start = -1;
+        const Int_t threshold = 3;
+        for (Int_t i = 0; i < nLayer - 2; ++i)
+            if (hits_on_layer.at(i) >= threshold && hits_on_layer.at(i + 1) >= threshold && hits_on_layer.at(i + 2) >= threshold)
             {
-                shower_start = i;
+                shower_start = i + 1;
                 break;
             }
         return shower_start;
@@ -485,27 +526,25 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     // The layer where the shower ends
     .Define("shower_end", [] (vector<Int_t> hits_on_layer, Int_t shower_start)
     {
-        Int_t shower_end = nLayer + 2;
-        const Int_t threshold = 4;
-        if (shower_start == nLayer + 2)
-            return shower_end;
-        for (Int_t i = shower_start; i < hits_on_layer.size() - 2; ++i)
-            if (hits_on_layer.at(i) < threshold && hits_on_layer.at(i + 1) < threshold && hits_on_layer.at(i + 2) < threshold)
+        Int_t shower_end = nLayer;
+        const Int_t threshold = 3;
+        if (shower_start == -1)
+            return -1;
+        for (Int_t i = shower_start - 1; i < nLayer - 1; ++i)
+            if (hits_on_layer.at(i) < threshold && hits_on_layer.at(i + 1) < threshold)
             {
-                shower_end = i;
+                shower_end = i + 1;
                 break;
             }
-        if (shower_end == nLayer + 2)
-            shower_end = nLayer;
         return shower_end;
     }, {"hits_on_layer", "shower_start"})
     // Shower radius with respect to COGX and COGY (between beginning and ending layers)
-    .Define("shower_radius", [] (vector<Double_t> Hit_X, vector<Double_t> Hit_Y, vector<Int_t> layer, Int_t beginning, Int_t ending, Int_t nhits, Double_t COG_X_mean, Double_t COG_Y_mean)
+    .Define("shower_radius", [] (vector<Double_t> Hit_X, vector<Double_t> Hit_Y, vector<Int_t> layer, Int_t shower_start, Int_t shower_end, Int_t nhits, Double_t COG_X_mean, Double_t COG_Y_mean)
     {
         Double_t d2 = 0;
         Int_t hits = 0;
         for (Int_t i = 0; i < nhits; ++i)
-            if (layer.at(i) >= beginning && layer.at(i) < ending)
+            if (layer.at(i) >= shower_start - 1 && layer.at(i) < shower_end - 1)
             {
                 ++hits;
                 d2 += Power(Hit_X.at(i) - COG_X_mean, 2) + Power(Hit_Y.at(i) - COG_Y_mean, 2);
@@ -521,7 +560,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         vector<Double_t> layer_xwidth(nLayer);
         vector<TH1D*> h;
         for (Int_t l = 0; l < nLayer; ++l)
-            h.emplace_back(new TH1D(TString("h") + TString(to_string(l)), "test", 100, -30, 30));
+            h.emplace_back(new TH1D(TString("h") + TString(to_string(l)), "test", 120, -30, 30));
         for (Int_t i = 0; i < nhits; ++i)
         {
             Int_t ilayer = layer.at(i);
@@ -541,7 +580,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         vector<Double_t> layer_ywidth(nLayer);
         vector<TH1D*> h;
         for (Int_t l = 0; l < nLayer; ++l)
-            h.emplace_back(new TH1D(TString("h") + TString(to_string(l)), "test", 100, -30, 30));
+            h.emplace_back(new TH1D(TString("h") + TString(to_string(l)), "test", 120, -30, 30));
         for (Int_t i = 0; i < nhits; ++i)
         {
             Int_t ilayer = layer.at(i);
@@ -555,7 +594,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         vector<TH1D*>().swap(h);
         return layer_ywidth;
     }, {"Hit_Y", "layer", "nhits", "COG_Y_mean"})
-    // Number of layers with xwidth, ywidth >= 60 mm
+    // Number of layers with xwidth, ywidth >= 6 cm
     .Define("shower_layer", [] (vector<Double_t> layer_xwidth, vector<Double_t> layer_ywidth)
     {
         Int_t shower_layer = 0;
@@ -576,7 +615,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
                 ++hit_layer;
         return hit_layer;
     }, {"layer"})
-    // The proportion of layers with xwidth, ywidth >= 60 mm within the layers with at least one hit
+    // The proportion of layers with xwidth, ywidth >= 6 cm within the layers with at least one hit
     .Define("shower_layer_ratio", [] (Int_t shower_layer, Int_t hit_layer, Int_t nhits)
     {
         if (nhits == 0)
@@ -631,15 +670,15 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         for (Int_t i = 0; i < layer_rms.size(); ++i)
             if (layer_rms.at(i) > max_rms)
             {
-                max_layer = i;
+                max_layer = i + 1;
         	    max_rms = layer_rms.at(i);
             }
 //        auto maxPosition = max_element(layer_rms.begin() + shower_start, layer_rms.end());
 //        Int_t max_layer = maxPosition - layer_rms.begin();
-        if (shower_start >= max_layer)
+        if (shower_start >= max_layer || shower_start == -1)
             shower_length = 0;
         else
-            shower_length = max_layer - shower_start;
+            shower_length = max_layer - shower_start + 1;
         return shower_length;
     }, {"layer_rms", "shower_start"})
     // 2-dimensional fractal dimension
@@ -824,7 +863,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", 1);
-    vector<TString> deactivate = { "Ecell", "Ecell_max_id", "FD_2D", "FD_3D", "Hit_Energy", "Hit_Phi", "Hit_Theta", "Hit_X", "Hit_Y", "Hit_Z", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
+    vector<TString> deactivate = { "Ecell", "Ecell_max_id", "Ecell_second_id", "FD_2D", "FD_3D", "Hit_Energy", "Hit_Phi", "Hit_Theta", "Hit_X", "Hit_Y", "Hit_Z", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
     for (TString de : deactivate)
         t->SetBranchStatus(de, 0);
     TFile* fnew = new TFile((TString) outname, "RECREATE");

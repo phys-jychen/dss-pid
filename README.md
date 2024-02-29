@@ -6,7 +6,7 @@ Ji-Yuan CHEN (SJTU; <jy_chen@sjtu.edu.cn>)
 ## Description
 This program is designed for the PID of DarkSHINE Baseline ECAL Design. By reconstructing variables describing the topology of the hadronic and electromagnetic showers, we can perform PID with the help of BDT, using the TMVA (the **T**oolkit for **M**ulti-**V**ariate data **A**nalysis with ROOT) package.
 
-For a more intuitive understanding of the shower topology, a python program is also included for event display (Currently, the staggered structure cannot be handled correctly). A better way is to use `DDis` in DarkSHINE simulation framework.
+For a more intuitive understanding of the shower topology, a python program is also included for event display. You can also use `DDis` in DarkSHINE simulation framework.
 
 ## Usage
 At first, you can run
