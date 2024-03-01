@@ -22,7 +22,7 @@ Int_t Hits::SaveBranches(const string& file, const string& tree)
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", 0);
 
-    vector<TString> remains = { "EventNumber", "ECAL_ECell_XYZ", "RunNumber" };
+    vector<TString> remains = { "EventNumber", "ECAL_Cluster_E", "ECAL_Cluster_N", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z", "ECAL_ECell_XYZ", "RunNumber" };
     for (TString re : remains)
         t->SetBranchStatus(re, 1);
 
@@ -95,6 +95,7 @@ Int_t Hits::OriginalHits(const string& file, const string& tree)
         }
         return Hit_Z;
     }, {"ECAL_ECell_XYZ", "ntotal"})
+    /*
     .Define("Hit_Theta", [] (vector<Double_t> Hit_X, vector<Double_t> Hit_Y, vector<Double_t> Hit_Z)
     {
         vector<Double_t> theta = {};
@@ -131,6 +132,7 @@ Int_t Hits::OriginalHits(const string& file, const string& tree)
         }
         return phi;
     }, {"Hit_X", "Hit_Y"})
+    */
     .Define("Hit_Energy", [] (vector<Double_t> ECAL_ECell_XYZ, Int_t ntotal)
     {
         vector<Double_t> Hit_Energy;
@@ -143,13 +145,30 @@ Int_t Hits::OriginalHits(const string& file, const string& tree)
         }
         return Hit_Energy;
     }, {"ECAL_ECell_XYZ", "ntotal"})
+    .Define("Eclus_max", [] (Int_t ECAL_Cluster_N, vector<Double_t> ECAL_Cluster_E)
+    {
+        Double_t Eclus_max = (ECAL_Cluster_N >= 1) ? ECAL_Cluster_E.at(0) : 0.0;
+        return Eclus_max;
+    }, {"ECAL_Cluster_N", "ECAL_Cluster_E"})
+    .Define("Eclus_second", [] (Int_t ECAL_Cluster_N, vector<Double_t> ECAL_Cluster_E)
+    {
+        Double_t Eclus_second = (ECAL_Cluster_N >= 2) ? ECAL_Cluster_E.at(1) : 0.0;
+        return Eclus_second;
+    }, {"ECAL_Cluster_N", "ECAL_Cluster_E"})
+    .Define("Eclus_max_sec_diff", "Eclus_max - Eclus_second")
+    .Define("Eclus_max_sec_dist", [] (Int_t ECAL_Cluster_N, vector<Double_t> ECAL_Cluster_X, vector<Double_t> ECAL_Cluster_Y, vector<Double_t> ECAL_Cluster_Z)
+    {
+        Double_t Eclus_max_sec_dist = (ECAL_Cluster_N >= 2) ? Sqrt(Power(ECAL_Cluster_X.at(0) - ECAL_Cluster_X.at(1), 2) + Power(ECAL_Cluster_Y.at(0) - ECAL_Cluster_Y.at(1), 2) + Power(ECAL_Cluster_Z.at(0) - ECAL_Cluster_Z.at(1), 2)) : 0.0;
+        return Eclus_max_sec_dist;
+    }, {"ECAL_Cluster_N", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z"})
     .Snapshot(tree, outname);
     delete dm;
 
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", 0);
-    vector<TString> remains = { "EventNumber", "Hit_Energy", "Hit_Phi", "Hit_Theta", "Hit_X", "Hit_Y", "Hit_Z", "RunNumber" };
+//    vector<TString> remains = { "ECAL_Cluster_N", "Eclus_max", "Eclus_second", "Eclus_max_sec_diff", "Eclus_max_sec_dist", "EventNumber", "Hit_Energy", "Hit_Phi", "Hit_Theta", "Hit_X", "Hit_Y", "Hit_Z", "RunNumber" };
+    vector<TString> remains = { "ECAL_Cluster_N", "Eclus_max", "Eclus_second", "Eclus_max_sec_diff", "Eclus_max_sec_dist", "EventNumber", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z", "RunNumber" };
     for (TString re : remains)
         t->SetBranchStatus(re, 1);
     TFile* fnew = new TFile((TString) outname, "RECREATE");

@@ -863,7 +863,8 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", 1);
-    vector<TString> deactivate = { "Ecell", "Ecell_max_id", "Ecell_second_id", "FD_2D", "FD_3D", "Hit_Energy", "Hit_Phi", "Hit_Theta", "Hit_X", "Hit_Y", "Hit_Z", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
+//    vector<TString> deactivate = { "Ecell", "Ecell_max_id", "Ecell_second_id", "FD_2D", "FD_3D", "Hit_Energy", "Hit_Phi", "Hit_Theta", "Hit_X", "Hit_Y", "Hit_Z", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
+    vector<TString> deactivate = { "Ecell", "Ecell_max_id", "Ecell_second_id", "FD_2D", "FD_3D", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
     for (TString de : deactivate)
         t->SetBranchStatus(de, 0);
     TFile* fnew = new TFile((TString) outname, "RECREATE");
