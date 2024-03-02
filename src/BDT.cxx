@@ -117,19 +117,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     cout << "==> Start TMVAMulticlassApplication" << endl;
     TMVA::Reader* reader = new TMVA::Reader( "!Color:!Silent" );
 
-//    Float_t  bdt_COG_X_4_0;
-//    Float_t  bdt_COG_X_4_1;
-//    Float_t  bdt_COG_X_4_2;
     Float_t  bdt_COG_X_mean;
-
-//    Float_t  bdt_COG_Y_4_0;
-//    Float_t  bdt_COG_Y_4_1;
-//    Float_t  bdt_COG_Y_4_2;
     Float_t  bdt_COG_Y_mean;
-
-//    Float_t  bdt_COG_Z_4_0;
-//    Float_t  bdt_COG_Z_4_1;
-//    Float_t  bdt_COG_Z_4_2;
     Float_t  bdt_COG_Z_mean;
 
     Float_t  bdt_E1E9;
@@ -139,69 +128,23 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_E9E25;
     Float_t  bdt_E9E49;
     Float_t  bdt_E9Edep;
+    Float_t  bdt_ECAL_Cluster_N;
     Float_t  bdt_Ecell_max;
     Float_t  bdt_Ecell_max_25;
     Float_t  bdt_Ecell_max_49;
     Float_t  bdt_Ecell_max_9;
     Float_t  bdt_Ecell_second;
+    Float_t  bdt_Eclus_max;
+    Float_t  bdt_Eclus_max_sec_diff;
+    Float_t  bdt_Eclus_max_sec_dist;
+    Float_t  bdt_Eclus_second;
     Float_t  bdt_Edep;
     Float_t  bdt_Emax_sec_diff;
     Float_t  bdt_Emax_sec_dist;
     Float_t  bdt_Emean;
 
-//    Float_t  bdt_FD_2D_10;
-//    Float_t  bdt_FD_2D_100;
-//    Float_t  bdt_FD_2D_110;
-//    Float_t  bdt_FD_2D_12;
-//    Float_t  bdt_FD_2D_120;
-//    Float_t  bdt_FD_2D_130;
-//    Float_t  bdt_FD_2D_140;
-//    Float_t  bdt_FD_2D_15;
-//    Float_t  bdt_FD_2D_150;
-//    Float_t  bdt_FD_2D_2;
-//    Float_t  bdt_FD_2D_20;
-//    Float_t  bdt_FD_2D_3;
-//    Float_t  bdt_FD_2D_30;
-//    Float_t  bdt_FD_2D_4;
-//    Float_t  bdt_FD_2D_40;
-//    Float_t  bdt_FD_2D_5;
-//    Float_t  bdt_FD_2D_50;
-//    Float_t  bdt_FD_2D_6;
-//    Float_t  bdt_FD_2D_60;
-//    Float_t  bdt_FD_2D_7;
-//    Float_t  bdt_FD_2D_70;
-//    Float_t  bdt_FD_2D_8;
-//    Float_t  bdt_FD_2D_80;
-//    Float_t  bdt_FD_2D_9;
-//    Float_t  bdt_FD_2D_90;
     Float_t  bdt_FD_2D_mean;
     Float_t  bdt_FD_2D_rms;
-
-//    Float_t  bdt_FD_3D_10;
-//    Float_t  bdt_FD_3D_100;
-//    Float_t  bdt_FD_3D_110;
-//    Float_t  bdt_FD_3D_12;
-//    Float_t  bdt_FD_3D_120;
-//    Float_t  bdt_FD_3D_130;
-//    Float_t  bdt_FD_3D_140;
-//    Float_t  bdt_FD_3D_15;
-//    Float_t  bdt_FD_3D_150;
-//    Float_t  bdt_FD_3D_2;
-//    Float_t  bdt_FD_3D_20;
-//    Float_t  bdt_FD_3D_3;
-//    Float_t  bdt_FD_3D_30;
-//    Float_t  bdt_FD_3D_4;
-//    Float_t  bdt_FD_3D_40;
-//    Float_t  bdt_FD_3D_5;
-//    Float_t  bdt_FD_3D_50;
-//    Float_t  bdt_FD_3D_6;
-//    Float_t  bdt_FD_3D_60;
-//    Float_t  bdt_FD_3D_7;
-//    Float_t  bdt_FD_3D_70;
-//    Float_t  bdt_FD_3D_8;
-//    Float_t  bdt_FD_3D_80;
-//    Float_t  bdt_FD_3D_9;
-//    Float_t  bdt_FD_3D_90;
     Float_t  bdt_FD_3D_mean;
     Float_t  bdt_FD_3D_rms;
 
@@ -219,19 +162,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_ywidth;
     Float_t  bdt_zdepth;
 
-//    reader->AddVariable("COG_X_4_0",          &bdt_COG_X_5_0);
-//    reader->AddVariable("COG_X_4_1",          &bdt_COG_X_5_1);
-//    reader->AddVariable("COG_X_4_2",          &bdt_COG_X_5_2);
     reader->AddVariable("COG_X_mean",         &bdt_COG_X_mean);
-
-//    reader->AddVariable("COG_Y_4_0",          &bdt_COG_X_5_0);
-//    reader->AddVariable("COG_Y_4_1",          &bdt_COG_X_5_1);
-//    reader->AddVariable("COG_Y_4_2",          &bdt_COG_X_5_2);
     reader->AddVariable("COG_Y_mean",         &bdt_COG_Y_mean);
-
-//    reader->AddVariable("COG_Z_4_0",          &bdt_COG_X_5_0);
-//    reader->AddVariable("COG_Z_4_1",          &bdt_COG_X_5_1);
-//    reader->AddVariable("COG_Z_4_2",          &bdt_COG_X_5_2);
     reader->AddVariable("COG_Z_mean",         &bdt_COG_Z_mean);
 
     reader->AddVariable("E1E9",               &bdt_E1E9);
@@ -241,69 +173,23 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     reader->AddVariable("E9E25",              &bdt_E9E25);
     reader->AddVariable("E9E49",              &bdt_E9E49);
     reader->AddVariable("E9Edep",             &bdt_E9Edep);
+    reader->AddVariable("ECAL_Cluster_N",     &bdt_ECAL_Cluster_N);
     reader->AddVariable("Ecell_max",          &bdt_Ecell_max);
     reader->AddVariable("Ecell_max_25",       &bdt_Ecell_max_25);
     reader->AddVariable("Ecell_max_49",       &bdt_Ecell_max_49);
     reader->AddVariable("Ecell_max_9",        &bdt_Ecell_max_9);
     reader->AddVariable("Ecell_second",       &bdt_Ecell_second);
+    reader->AddVariable("Eclus_max",          &bdt_Eclus_max);
+    reader->AddVariable("Eclus_max_sec_diff", &bdt_Eclus_max_sec_diff);
+    reader->AddVariable("Eclus_max_sec_dist", &bdt_Eclus_max_sec_dist);
+    reader->AddVariable("Eclus_second",       &bdt_Eclus_second);
     reader->AddVariable("Edep",               &bdt_Edep);
     reader->AddVariable("Emax_sec_diff",      &bdt_Emax_sec_diff);
     reader->AddVariable("Emax_sec_dist",      &bdt_Emax_sec_dist);
     reader->AddVariable("Emean",              &bdt_Emean);
 
-//    reader->AddVariable("FD_2D_10",           &bdt_FD_2D_10);
-//    reader->AddVariable("FD_2D_100",          &bdt_FD_2D_100);
-//    reader->AddVariable("FD_2D_110",          &bdt_FD_2D_110);
-//    reader->AddVariable("FD_2D_12",           &bdt_FD_2D_12);
-//    reader->AddVariable("FD_2D_120",          &bdt_FD_2D_120);
-//    reader->AddVariable("FD_2D_130",          &bdt_FD_2D_130);
-//    reader->AddVariable("FD_2D_140",          &bdt_FD_2D_140);
-//    reader->AddVariable("FD_2D_15",           &bdt_FD_2D_15);
-//    reader->AddVariable("FD_2D_150",          &bdt_FD_2D_150);
-//    reader->AddVariable("FD_2D_2",            &bdt_FD_2D_2);
-//    reader->AddVariable("FD_2D_20",           &bdt_FD_2D_20);
-//    reader->AddVariable("FD_2D_3",            &bdt_FD_2D_3);
-//    reader->AddVariable("FD_2D_30",           &bdt_FD_2D_30);
-//    reader->AddVariable("FD_2D_4",            &bdt_FD_2D_4);
-//    reader->AddVariable("FD_2D_40",           &bdt_FD_2D_40);
-//    reader->AddVariable("FD_2D_5",            &bdt_FD_2D_5);
-//    reader->AddVariable("FD_2D_50",           &bdt_FD_2D_50);
-//    reader->AddVariable("FD_2D_6",            &bdt_FD_2D_6);
-//    reader->AddVariable("FD_2D_60",           &bdt_FD_2D_60);
-//    reader->AddVariable("FD_2D_7",            &bdt_FD_2D_7);
-//    reader->AddVariable("FD_2D_70",           &bdt_FD_2D_70);
-//    reader->AddVariable("FD_2D_8",            &bdt_FD_2D_8);
-//    reader->AddVariable("FD_2D_80",           &bdt_FD_2D_80);
-//    reader->AddVariable("FD_2D_9",            &bdt_FD_2D_9);
-//    reader->AddVariable("FD_2D_90",           &bdt_FD_2D_90);
     reader->AddVariable("FD_2D_mean",         &bdt_FD_2D_mean);
     reader->AddVariable("FD_2D_rms",          &bdt_FD_2D_rms);
-
-//    reader->AddVariable("FD_3D_10",           &bdt_FD_3D_10);
-//    reader->AddVariable("FD_3D_100",          &bdt_FD_3D_100);
-//    reader->AddVariable("FD_3D_110",          &bdt_FD_3D_110);
-//    reader->AddVariable("FD_3D_12",           &bdt_FD_3D_12);
-//    reader->AddVariable("FD_3D_120",          &bdt_FD_3D_120);
-//    reader->AddVariable("FD_3D_130",          &bdt_FD_3D_130);
-//    reader->AddVariable("FD_3D_140",          &bdt_FD_3D_140);
-//    reader->AddVariable("FD_3D_15",           &bdt_FD_3D_15);
-//    reader->AddVariable("FD_3D_150",          &bdt_FD_3D_150);
-//    reader->AddVariable("FD_3D_2",            &bdt_FD_3D_2);
-//    reader->AddVariable("FD_3D_20",           &bdt_FD_3D_20);
-//    reader->AddVariable("FD_3D_3",            &bdt_FD_3D_3);
-//    reader->AddVariable("FD_3D_30",           &bdt_FD_3D_30);
-//    reader->AddVariable("FD_3D_4",            &bdt_FD_3D_4);
-//    reader->AddVariable("FD_3D_40",           &bdt_FD_3D_40);
-//    reader->AddVariable("FD_3D_5",            &bdt_FD_3D_5);
-//    reader->AddVariable("FD_3D_50",           &bdt_FD_3D_50);
-//    reader->AddVariable("FD_3D_6",            &bdt_FD_3D_6);
-//    reader->AddVariable("FD_3D_60",           &bdt_FD_3D_60);
-//    reader->AddVariable("FD_3D_7",            &bdt_FD_3D_7);
-//    reader->AddVariable("FD_3D_70",           &bdt_FD_3D_70);
-//    reader->AddVariable("FD_3D_8",            &bdt_FD_3D_8);
-//    reader->AddVariable("FD_3D_80",           &bdt_FD_3D_80);
-//    reader->AddVariable("FD_3D_9",            &bdt_FD_3D_9);
-//    reader->AddVariable("FD_3D_90",           &bdt_FD_3D_90);
     reader->AddVariable("FD_3D_mean",         &bdt_FD_3D_mean);
     reader->AddVariable("FD_3D_rms",          &bdt_FD_3D_rms);
 
@@ -326,19 +212,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 
     vector<string> rdf_input = {};
 
-//    rdf_input.emplace_back("COG_X_4_0");
-//    rdf_input.emplace_back("COG_X_4_1");
-//    rdf_input.emplace_back("COG_X_4_2");
     rdf_input.emplace_back("COG_X_mean");
-
-//    rdf_input.emplace_back("COG_Y_4_0");
-//    rdf_input.emplace_back("COG_Y_4_1");
-//    rdf_input.emplace_back("COG_Y_4_2");
     rdf_input.emplace_back("COG_Y_mean");
-
-//    rdf_input.emplace_back("COG_Z_4_0");
-//    rdf_input.emplace_back("COG_Z_4_1");
-//    rdf_input.emplace_back("COG_Z_4_2");
     rdf_input.emplace_back("COG_Z_mean");
 
     rdf_input.emplace_back("E1E9");
@@ -348,69 +223,23 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("E9E25");
     rdf_input.emplace_back("E9E49");
     rdf_input.emplace_back("E9Edep");
+    rdf_input.emplace_back("ECAL_Cluster_N");
     rdf_input.emplace_back("Ecell_max");
     rdf_input.emplace_back("Ecell_max_25");
     rdf_input.emplace_back("Ecell_max_49");
     rdf_input.emplace_back("Ecell_max_9");
     rdf_input.emplace_back("Ecell_second");
+    rdf_input.emplace_back("Eclus_max");
+    rdf_input.emplace_back("Eclus_max_sec_diff");
+    rdf_input.emplace_back("Eclus_max_sec_dist");
+    rdf_input.emplace_back("Eclus_second");
     rdf_input.emplace_back("Edep");
     rdf_input.emplace_back("Emax_sec_diff");
     rdf_input.emplace_back("Emax_sec_dist");
     rdf_input.emplace_back("Emean");
 
-//    rdf_input.emplace_back("FD_2D_10");
-//    rdf_input.emplace_back("FD_2D_100");
-//    rdf_input.emplace_back("FD_2D_110");
-//    rdf_input.emplace_back("FD_2D_12");
-//    rdf_input.emplace_back("FD_2D_120");
-//    rdf_input.emplace_back("FD_2D_130");
-//    rdf_input.emplace_back("FD_2D_140");
-//    rdf_input.emplace_back("FD_2D_15");
-//    rdf_input.emplace_back("FD_2D_150");
-//    rdf_input.emplace_back("FD_2D_2");
-//    rdf_input.emplace_back("FD_2D_20");
-//    rdf_input.emplace_back("FD_2D_3");
-//    rdf_input.emplace_back("FD_2D_30");
-//    rdf_input.emplace_back("FD_2D_4");
-//    rdf_input.emplace_back("FD_2D_40");
-//    rdf_input.emplace_back("FD_2D_5");
-//    rdf_input.emplace_back("FD_2D_50");
-//    rdf_input.emplace_back("FD_2D_6");
-//    rdf_input.emplace_back("FD_2D_60");
-//    rdf_input.emplace_back("FD_2D_7");
-//    rdf_input.emplace_back("FD_2D_70");
-//    rdf_input.emplace_back("FD_2D_8");
-//    rdf_input.emplace_back("FD_2D_80");
-//    rdf_input.emplace_back("FD_2D_9");
-//    rdf_input.emplace_back("FD_2D_90");
     rdf_input.emplace_back("FD_2D_mean");
     rdf_input.emplace_back("FD_2D_rms");
-
-//    rdf_input.emplace_back("FD_3D_10");
-//    rdf_input.emplace_back("FD_3D_100");
-//    rdf_input.emplace_back("FD_3D_110");
-//    rdf_input.emplace_back("FD_3D_12");
-//    rdf_input.emplace_back("FD_3D_120");
-//    rdf_input.emplace_back("FD_3D_130");
-//    rdf_input.emplace_back("FD_3D_140");
-//    rdf_input.emplace_back("FD_3D_15");
-//    rdf_input.emplace_back("FD_3D_150");
-//    rdf_input.emplace_back("FD_3D_2");
-//    rdf_input.emplace_back("FD_3D_20");
-//    rdf_input.emplace_back("FD_3D_3");
-//    rdf_input.emplace_back("FD_3D_30");
-//    rdf_input.emplace_back("FD_3D_4");
-//    rdf_input.emplace_back("FD_3D_40");
-//    rdf_input.emplace_back("FD_3D_5");
-//    rdf_input.emplace_back("FD_3D_50");
-//    rdf_input.emplace_back("FD_3D_6");
-//    rdf_input.emplace_back("FD_3D_60");
-//    rdf_input.emplace_back("FD_3D_7");
-//    rdf_input.emplace_back("FD_3D_70");
-//    rdf_input.emplace_back("FD_3D_8");
-//    rdf_input.emplace_back("FD_3D_80");
-//    rdf_input.emplace_back("FD_3D_9");
-//    rdf_input.emplace_back("FD_3D_90");
     rdf_input.emplace_back("FD_3D_mean");
     rdf_input.emplace_back("FD_3D_rms");
 
@@ -431,17 +260,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
     RDataFrame df(tname, fname);
 
     auto bdtout = df.Define("Response_Sig", [&]
-//        (Double_t COG_X_4_0,
-//         Double_t COG_X_4_1,
-//         Double_t COG_X_4_2,
         (Double_t COG_X_mean,
-//         Double_t COG_Y_4_0,
-//         Double_t COG_Y_4_1,
-//         Double_t COG_Y_4_2,
          Double_t COG_Y_mean,
-//         Double_t COG_Z_4_0,
-//         Double_t COG_Z_4_1,
-//         Double_t COG_Z_4_2,
          Double_t COG_Z_mean,
          Double_t E1E9,
          Double_t E1Edep,
@@ -450,67 +270,22 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
          Double_t E9E25,
          Double_t E9E49,
          Double_t E9Edep,
+         Int_t    ECAL_Cluster_N,
          Double_t Ecell_max,
          Double_t Ecell_max_25,
          Double_t Ecell_max_49,
          Double_t Ecell_max_9,
          Double_t Ecell_second,
+         Double_t Eclus_max,
+         Double_t Eclus_max_sec_diff,
+         Double_t Eclus_max_sec_dist,
+         Double_t Eclus_second,
          Double_t Edep,
          Double_t Emax_sec_diff,
          Double_t Emax_sec_dist,
          Double_t Emean,
-//         Double_t FD_2D_10,
-//         Double_t FD_2D_100,
-//         Double_t FD_2D_110,
-//         Double_t FD_2D_12,
-//         Double_t FD_2D_120,
-//         Double_t FD_2D_130,
-//         Double_t FD_2D_140,
-//         Double_t FD_2D_15,
-//         Double_t FD_2D_150,
-//         Double_t FD_2D_2,
-//         Double_t FD_2D_20,
-//         Double_t FD_2D_3,
-//         Double_t FD_2D_30,
-//         Double_t FD_2D_4,
-//         Double_t FD_2D_40,
-//         Double_t FD_2D_5,
-//         Double_t FD_2D_50,
-//         Double_t FD_2D_6,
-//         Double_t FD_2D_60,
-//         Double_t FD_2D_7,
-//         Double_t FD_2D_70,
-//         Double_t FD_2D_8,
-//         Double_t FD_2D_80,
-//         Double_t FD_2D_9,
-//         Double_t FD_2D_90,
          Double_t FD_2D_mean,
          Double_t FD_2D_rms,
-//         Double_t FD_3D_10,
-//         Double_t FD_3D_100,
-//         Double_t FD_3D_110,
-//         Double_t FD_3D_12,
-//         Double_t FD_3D_120,
-//         Double_t FD_3D_130,
-//         Double_t FD_3D_140,
-//         Double_t FD_3D_15,
-//         Double_t FD_3D_150,
-//         Double_t FD_3D_2,
-//         Double_t FD_3D_20,
-//         Double_t FD_3D_3,
-//         Double_t FD_3D_30,
-//         Double_t FD_3D_4,
-//         Double_t FD_3D_40,
-//         Double_t FD_3D_5,
-//         Double_t FD_3D_50,
-//         Double_t FD_3D_6,
-//         Double_t FD_3D_60,
-//         Double_t FD_3D_7,
-//         Double_t FD_3D_70,
-//         Double_t FD_3D_8,
-//         Double_t FD_3D_80,
-//         Double_t FD_3D_9,
-//         Double_t FD_3D_90,
          Double_t FD_3D_mean,
          Double_t FD_3D_rms,
          Int_t    hit_layer,
@@ -527,19 +302,8 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
          Double_t ywidth,
          Double_t zdepth)
     {
-//        bdt_COG_X_4_0          = COG_X_4_0;
-//        bdt_COG_X_4_1          = COG_X_4_1;
-//        bdt_COG_X_4_2          = COG_X_4_2;
         bdt_COG_X_mean         = COG_X_mean;
-
-//        bdt_COG_Y_4_0          = COG_Y_4_0;
-//        bdt_COG_Y_4_1          = COG_Y_4_1;
-//        bdt_COG_Y_4_2          = COG_Y_4_2;
         bdt_COG_Y_mean         = COG_Y_mean;
-
-//        bdt_COG_Z_4_0          = COG_Z_4_0;
-//        bdt_COG_Z_4_1          = COG_Z_4_1;
-//        bdt_COG_Z_4_2          = COG_Z_4_2;
         bdt_COG_Z_mean         = COG_Z_mean;
 
         bdt_E1E9               = E1E9;
@@ -549,69 +313,23 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
         bdt_E9E25              = E9E25;
         bdt_E9E49              = E9E49;
         bdt_E9Edep             = E9Edep;
+        bdt_ECAL_Cluster_N     = ECAL_Cluster_N;
         bdt_Ecell_max          = Ecell_max;
         bdt_Ecell_max_25       = Ecell_max_25;
         bdt_Ecell_max_49       = Ecell_max_49;
         bdt_Ecell_max_9        = Ecell_max_9;
         bdt_Ecell_second       = Ecell_second;
+        bdt_Eclus_max          = Eclus_max;
+        bdt_Eclus_max_sec_diff = Eclus_max_sec_diff;
+        bdt_Eclus_max_sec_dist = Eclus_max_sec_dist;
+        bdt_Eclus_second       = Eclus_second;
         bdt_Edep               = Edep;
         bdt_Emax_sec_diff      = Emax_sec_diff;
         bdt_Emax_sec_dist      = Emax_sec_dist;
         bdt_Emean              = Emean;
 
-//        bdt_FD_2D_10           = FD_2D_10;
-//        bdt_FD_2D_100          = FD_2D_100;
-//        bdt_FD_2D_110          = FD_2D_110;
-//        bdt_FD_2D_12           = FD_2D_12;
-//        bdt_FD_2D_120          = FD_2D_120;
-//        bdt_FD_2D_130          = FD_2D_130;
-//        bdt_FD_2D_140          = FD_2D_140;
-//        bdt_FD_2D_15           = FD_2D_15;
-//        bdt_FD_2D_150          = FD_2D_150;
-//        bdt_FD_2D_2            = FD_2D_2;
-//        bdt_FD_2D_20           = FD_2D_20;
-//        bdt_FD_2D_3            = FD_2D_3;
-//        bdt_FD_2D_30           = FD_2D_30;
-//        bdt_FD_2D_4            = FD_2D_4;
-//        bdt_FD_2D_40           = FD_2D_40;
-//        bdt_FD_2D_5            = FD_2D_5;
-//        bdt_FD_2D_50           = FD_2D_50;
-//        bdt_FD_2D_6            = FD_2D_6;
-//        bdt_FD_2D_60           = FD_2D_60;
-//        bdt_FD_2D_7            = FD_2D_7;
-//        bdt_FD_2D_70           = FD_2D_70;
-//        bdt_FD_2D_8            = FD_2D_8;
-//        bdt_FD_2D_80           = FD_2D_80;
-//        bdt_FD_2D_9            = FD_2D_9;
-//        bdt_FD_2D_90           = FD_2D_90;
         bdt_FD_2D_mean         = FD_2D_mean;
         bdt_FD_2D_rms          = FD_2D_rms;
-
-//        bdt_FD_3D_10           = FD_3D_10;
-//        bdt_FD_3D_100          = FD_3D_100;
-//        bdt_FD_3D_110          = FD_3D_110;
-//        bdt_FD_3D_12           = FD_3D_12;
-//        bdt_FD_3D_120          = FD_3D_120;
-//        bdt_FD_3D_130          = FD_3D_130;
-//        bdt_FD_3D_140          = FD_3D_140;
-//        bdt_FD_3D_15           = FD_3D_15;
-//        bdt_FD_3D_150          = FD_3D_150;
-//        bdt_FD_3D_2            = FD_3D_2;
-//        bdt_FD_3D_20           = FD_3D_20;
-//        bdt_FD_3D_3            = FD_3D_3;
-//        bdt_FD_3D_30           = FD_3D_30;
-//        bdt_FD_3D_4            = FD_3D_4;
-//        bdt_FD_3D_40           = FD_3D_40;
-//        bdt_FD_3D_5            = FD_3D_5;
-//        bdt_FD_3D_50           = FD_3D_50;
-//        bdt_FD_3D_6            = FD_3D_6;
-//        bdt_FD_3D_60           = FD_3D_60;
-//        bdt_FD_3D_7            = FD_3D_7;
-//        bdt_FD_3D_70           = FD_3D_70;
-//        bdt_FD_3D_8            = FD_3D_8;
-//        bdt_FD_3D_80           = FD_3D_80;
-//        bdt_FD_3D_9            = FD_3D_9;
-//        bdt_FD_3D_90           = FD_3D_90;
         bdt_FD_3D_mean         = FD_3D_mean;
         bdt_FD_3D_rms          = FD_3D_rms;
 

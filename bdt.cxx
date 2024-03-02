@@ -51,19 +51,8 @@ Int_t main(Int_t argc, Char_t* argv[])
         cout << "----> Training and testing..." << endl;
         cout << "----> Tree: " << tree << endl;
 
-//        b->AddVar("COG_X_4_0",          'D');
-//        b->AddVar("COG_X_4_1",          'D');
-//        b->AddVar("COG_X_4_2",          'D');
         b->AddVar("COG_X_mean",         'D');
-
-//        b->AddVar("COG_Y_4_0",          'D');
-//        b->AddVar("COG_Y_4_1",          'D');
-//        b->AddVar("COG_Y_4_2",          'D');
         b->AddVar("COG_Y_mean",         'D');
-
-//        b->AddVar("COG_Z_4_0",          'D');
-//        b->AddVar("COG_Z_4_1",          'D');
-//        b->AddVar("COG_Z_4_2",          'D');
         b->AddVar("COG_Z_mean",         'D');
 
         b->AddVar("E1E9",               'D');
@@ -73,71 +62,23 @@ Int_t main(Int_t argc, Char_t* argv[])
         b->AddVar("E9E25",              'D');
         b->AddVar("E9E49",              'D');
         b->AddVar("E9Edep",             'D');
+        b->AddVar("ECAL_Cluster_N",     'I');
         b->AddVar("Ecell_max",          'D');
         b->AddVar("Ecell_max_25",       'D');
         b->AddVar("Ecell_max_49",       'D');
         b->AddVar("Ecell_max_9",        'D');
         b->AddVar("Ecell_second",       'D');
+        b->AddVar("Eclus_max",          'D');
+        b->AddVar("Eclus_max_sec_diff", 'D');
+        b->AddVar("Eclus_max_sec_dist", 'D');
+        b->AddVar("Eclus_second",       'D');
         b->AddVar("Edep",               'D');
         b->AddVar("Emax_sec_diff",      'D');
         b->AddVar("Emax_sec_dist",      'D');
         b->AddVar("Emean",              'D');
 
-        // FD_2D
-//        b->AddVar("FD_2D_10",           'D');
-//        b->AddVar("FD_2D_100",          'D');
-//        b->AddVar("FD_2D_110",          'D');
-//        b->AddVar("FD_2D_12",           'D');
-//        b->AddVar("FD_2D_120",          'D');
-//        b->AddVar("FD_2D_130",          'D');
-//        b->AddVar("FD_2D_140",          'D');
-//        b->AddVar("FD_2D_15",           'D');
-//        b->AddVar("FD_2D_150",          'D');
-//        b->AddVar("FD_2D_2",            'D');
-//        b->AddVar("FD_2D_20",           'D');
-//        b->AddVar("FD_2D_3",            'D');
-//        b->AddVar("FD_2D_30",           'D');
-//        b->AddVar("FD_2D_4",            'D');
-//        b->AddVar("FD_2D_40",           'D');
-//        b->AddVar("FD_2D_5",            'D');
-//        b->AddVar("FD_2D_50",           'D');
-//        b->AddVar("FD_2D_6",            'D');
-//        b->AddVar("FD_2D_60",           'D');
-//        b->AddVar("FD_2D_7",            'D');
-//        b->AddVar("FD_2D_70",           'D');
-//        b->AddVar("FD_2D_8",            'D');
-//        b->AddVar("FD_2D_80",           'D');
-//        b->AddVar("FD_2D_9",            'D');
-//        b->AddVar("FD_2D_90",           'D');
         b->AddVar("FD_2D_mean",         'D');
         b->AddVar("FD_2D_rms",          'D');
-
-        // FD_3D
-//        b->AddVar("FD_3D_10",           'D');
-//        b->AddVar("FD_3D_100",          'D');
-//        b->AddVar("FD_3D_110",          'D');
-//        b->AddVar("FD_3D_12",           'D');
-//        b->AddVar("FD_3D_120",          'D');
-//        b->AddVar("FD_3D_130",          'D');
-//        b->AddVar("FD_3D_140",          'D');
-//        b->AddVar("FD_3D_15",           'D');
-//        b->AddVar("FD_3D_150",          'D');
-//        b->AddVar("FD_3D_2",            'D');
-//        b->AddVar("FD_3D_20",           'D');
-//        b->AddVar("FD_3D_3",            'D');
-//        b->AddVar("FD_3D_30",           'D');
-//        b->AddVar("FD_3D_4",            'D');
-//        b->AddVar("FD_3D_40",           'D');
-//        b->AddVar("FD_3D_5",            'D');
-//        b->AddVar("FD_3D_50",           'D');
-//        b->AddVar("FD_3D_6",            'D');
-//        b->AddVar("FD_3D_60",           'D');
-//        b->AddVar("FD_3D_7",            'D');
-//        b->AddVar("FD_3D_70",           'D');
-//        b->AddVar("FD_3D_8",            'D');
-//        b->AddVar("FD_3D_80",           'D');
-//        b->AddVar("FD_3D_9",            'D');
-//        b->AddVar("FD_3D_90",           'D');
         b->AddVar("FD_3D_mean",         'D');
         b->AddVar("FD_3D_rms",          'D');
 
@@ -156,7 +97,14 @@ Int_t main(Int_t argc, Char_t* argv[])
         b->AddVar("zdepth",             'D');
 
         const Int_t energy_points = 200;
-        string path = "/lustre/collider/chenjiyuan/dss-pid/run/e-pi-/root/";
+        string path = "/lustre/collider/chenjiyuan/dss-pid/run/e-signal/root/";
+
+        /* | Particle | Training  |    Test    |
+         * | --------------------------------- |
+         * |    e-    |  1--200   |  401--600  |
+         * |    pi-   | 201--400  |  601--800  |
+         * |   gamma  | 801--1000 | 1000--1200 |
+         */
 
         for (Int_t i = 1; i <= energy_points; ++i)
         {
@@ -165,8 +113,10 @@ Int_t main(Int_t argc, Char_t* argv[])
             b->AddTestSig( path + "test/job" + to_string(400 + i) + "_e-_" + to_string(10 * i) + "MeV/e-_" + to_string(10 * i) + "MeV.root", tree);
 
             // Background
-            b->AddTrainBkg(path + "training/job" + to_string(200 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
-            b->AddTestBkg( path + "test/job" + to_string(600 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
+            b->AddTrainBkg(path + "training/job" + to_string(800 + i) + "_gamma_" + to_string(10 * i) + "MeV/gamma_" + to_string(10 * i) + "MeV.root", tree);
+            b->AddTestBkg( path + "test/job" + to_string(1000 + i) + "_gamma_" + to_string(10 * i) + "MeV/gamma_" + to_string(10 * i) + "MeV.root", tree);
+//            b->AddTrainBkg(path + "training/job" + to_string(200 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
+//            b->AddTestBkg( path + "test/job" + to_string(600 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
         }
 
         b->TrainBDT();

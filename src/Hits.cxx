@@ -158,7 +158,7 @@ Int_t Hits::OriginalHits(const string& file, const string& tree)
     .Define("Eclus_max_sec_diff", "Eclus_max - Eclus_second")
     .Define("Eclus_max_sec_dist", [] (Int_t ECAL_Cluster_N, vector<Double_t> ECAL_Cluster_X, vector<Double_t> ECAL_Cluster_Y, vector<Double_t> ECAL_Cluster_Z)
     {
-        Double_t Eclus_max_sec_dist = (ECAL_Cluster_N >= 2) ? Sqrt(Power(ECAL_Cluster_X.at(0) - ECAL_Cluster_X.at(1), 2) + Power(ECAL_Cluster_Y.at(0) - ECAL_Cluster_Y.at(1), 2) + Power(ECAL_Cluster_Z.at(0) - ECAL_Cluster_Z.at(1), 2)) : 0.0;
+        Double_t Eclus_max_sec_dist = (ECAL_Cluster_N >= 2) ? 0.1 * Sqrt(Power(ECAL_Cluster_X.at(0) - ECAL_Cluster_X.at(1), 2) + Power(ECAL_Cluster_Y.at(0) - ECAL_Cluster_Y.at(1), 2) + Power(ECAL_Cluster_Z.at(0) - ECAL_Cluster_Z.at(1), 2)) : 0.0;
         return Eclus_max_sec_dist;
     }, {"ECAL_Cluster_N", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z"})
     .Snapshot(tree, outname);

@@ -154,7 +154,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     .Define("COG_X_4_0", "COG_X_4[0]")
     .Define("COG_X_4_1", "COG_X_4[1]")
     .Define("COG_X_4_2", "COG_X_4[2]")
-    // Centre of gravity of every 5 layers, in y direction
+    // Centre of gravity of every 4 layers, in y direction
     .Define("COG_Y_4", [] (vector<Double_t> Hit_Y, vector<Int_t> layer, vector<Double_t> Hit_Energy, vector<Double_t> layer_energy, Int_t nhits)
     {
         vector<Double_t> cog_y_4(nLayer / 4);
@@ -175,7 +175,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     .Define("COG_Y_4_0", "COG_Y_4[0]")
     .Define("COG_Y_4_1", "COG_Y_4[1]")
     .Define("COG_Y_4_2", "COG_Y_4[2]")
-    // Centre of gravity of every 5 layers, in z direction
+    // Centre of gravity of every 4 layers, in z direction
     .Define("COG_Z_4", [] (vector<Double_t> Hit_Z, vector<Int_t> layer, vector<Double_t> Hit_Energy, vector<Double_t> layer_energy, Int_t nhits)
     {
         vector<Double_t> cog_z_4(nLayer / 4);
