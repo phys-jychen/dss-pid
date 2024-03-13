@@ -270,15 +270,13 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         return zdepth;
     }, {"Hit_Z"})
     // The energy deposition of the fired cells
-    .Define("Ecell", [] (vector<Double_t> Hit_X, vector<Double_t> Hit_Y, vector<Int_t> layer, vector<Double_t> Hit_Energy, Int_t nhits)
+    .Define("Ecell", [] (vector<Int_t> CellID, vector<Double_t> Hit_Energy, Int_t nhits)
     {
         unordered_map<Int_t, Double_t> Ecell_map;
         vector<vector<Double_t>> Ecell = { {}, {} };
         for (Int_t i = 0; i < nhits; ++i)
         {
-            Int_t x = round((Hit_X.at(i) + BiasX) / CellWidthX);
-            Int_t y = round((Hit_Y.at(i) + BiasY) / CellWidthY);
-            Int_t index = 10000 * layer.at(i) + 100 * x + y;
+            Int_t index = CellID.at(i);
             Ecell_map[index] += Hit_Energy.at(i);
         }
         for (auto it = Ecell_map.cbegin(); it != Ecell_map.cend(); ++it)
@@ -287,7 +285,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             Ecell.at(1).emplace_back(it->second);
         }
         return Ecell;
-    }, {"Hit_X", "Hit_Y", "layer", "Hit_Energy", "nhits"})
+    }, {"CellID", "Hit_Energy", "nhits"})
     // The maximum energy deposition as well as its ID
     .Define("Ecell_max_id", [] (vector<vector<Double_t>> Ecell, Int_t nhits)
     {
@@ -624,27 +622,22 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
             return (Double_t) shower_layer / (Double_t) hit_layer;
     }, {"shower_layer", "hit_layer", "nhits"})
     // Average number of hits in the 3*3 cells around a given one
-    .Define("shower_density", [] (vector<Double_t> Hit_X, vector<Double_t> Hit_Y, vector<Int_t> layer, vector<Double_t> Hit_Energy, Int_t nhits)
+    .Define("shower_density", [] (vector<Int_t> CellID, Int_t nhits)
     {
         Double_t shower_density = 0.0;
         if (nhits == 0)
             return shower_density;
         unordered_map<Int_t, Int_t> map_CellID;
-        for (Int_t j = 0; j < nhits; ++j)
-        {
-            Int_t x = round((Hit_X.at(j) + BiasX) / CellWidthX);
-            Int_t y = round((Hit_Y.at(j) + BiasY) / CellWidthY);
-            Int_t z = layer.at(j);
-            Int_t index = z * 10000 + x * 100 + y;
-            map_CellID[index] += 1;
-        }
         for (Int_t i = 0; i < nhits; ++i)
         {
-            if (Hit_Energy.at(i) == 0.0)
-                continue;
-            Int_t x = round((Hit_X.at(i) + BiasX) / CellWidthX);
-            Int_t y = round((Hit_Y.at(i) + BiasY) / CellWidthY);
-            Int_t z = layer.at(i);
+            Int_t index = CellID.at(i);
+            ++map_CellID[index];
+        }
+        for (Int_t j = 0; j < nhits; ++j)
+        {
+            Int_t x = (CellID.at(j) % 10000) / 100;
+            Int_t y = CellID.at(j) % 100;
+            Int_t z = CellID.at(j) / 10000;
             for (Int_t ix = x - 1; ix <= x + 1; ++ix)
             {
                 if (ix < 0 || ix > nCellX - 1)
@@ -660,7 +653,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         }
         shower_density /= nhits;
         return shower_density;
-    }, {"Hit_X", "Hit_Y", "layer", "Hit_Energy", "nhits"})
+    }, {"CellID", "nhits"})
     // The distance between the layer with largest RMS value of position (with respect to COGX and COGY) and the beginning layer
     .Define("shower_length", [] (vector<Double_t> layer_rms, Int_t shower_start)
     {
@@ -700,6 +693,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         }
         return fd_2d;
     }, {"Hit_X", "Hit_Y", "Hit_Z", "nhits"})
+    /*
     .Define("FD_2D_2",   "FD_2D[0]")
     .Define("FD_2D_3",   "FD_2D[1]")
     .Define("FD_2D_4",   "FD_2D[2]")
@@ -725,6 +719,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     .Define("FD_2D_130", "FD_2D[22]")
     .Define("FD_2D_140", "FD_2D[23]")
     .Define("FD_2D_150", "FD_2D[24]")
+     */
     // 3-dimensional fractal dimension
     .Define("FD_3D", [] (vector<Double_t> Hit_X, vector<Double_t> Hit_Y, vector<Double_t> Hit_Z, Int_t nhits)
     {
@@ -744,6 +739,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
         }
         return fd_3d;
     }, {"Hit_X", "Hit_Y", "Hit_Z", "nhits"})
+    /*
     .Define("FD_3D_2",   "FD_3D[0]")
     .Define("FD_3D_3",   "FD_3D[1]")
     .Define("FD_3D_4",   "FD_3D[2]")
@@ -769,6 +765,7 @@ Int_t Variables::GenNtuple(const string& file, const string& tree)
     .Define("FD_3D_130", "FD_3D[22]")
     .Define("FD_3D_140", "FD_3D[23]")
     .Define("FD_3D_150", "FD_3D[24]")
+     */
     // Average value of all the 2-dimensional fractal dimensions
     .Define("FD_2D_mean", [] (vector<Double_t> FD_2D)
     {

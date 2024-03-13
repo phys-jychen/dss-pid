@@ -1,10 +1,13 @@
 #include "Hits.h"
 
 const Double_t threshold = 0.0;
-const Int_t nCellsX = 21, nCellsY = 21;
+const Int_t nCellsX = 21;
+const Int_t nCellsY = 21;
 const Int_t nCellsXBias = (Int_t) round(0.5 * (nCellsX - 1));
 const Int_t nCellsYBias = (Int_t) round(0.5 * (nCellsY - 1));
-const Double_t CellX = 2.5, CellY = 2.5, CellZ = 4.0;
+const Double_t CellX = 2.5;
+const Double_t CellY = 2.5;
+const Double_t CellZ = 4.0;
 
 const Bool_t staggered = true;
 
@@ -22,7 +25,7 @@ Int_t Hits::SaveBranches(const string& file, const string& tree)
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", 0);
 
-    vector<TString> remains = { "EventNumber", "ECAL_Cluster_E", "ECAL_Cluster_N", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z", "ECAL_ECell_XYZ", "RunNumber" };
+    vector<TString> remains = { "EventNumber", "ECAL_ClusterSub_E", "ECAL_ClusterSub_matchRecTrk", "ECAL_ClusterSub_N", "ECAL_ClusterSub_X", "ECAL_ClusterSub_Y", "ECAL_ClusterSub_Z", "ECAL_Cluster_E", "ECAL_Cluster_N", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z", "ECAL_ECell_XYZ", "RunNumber" };
     for (TString re : remains)
         t->SetBranchStatus(re, 1);
 
@@ -95,44 +98,19 @@ Int_t Hits::OriginalHits(const string& file, const string& tree)
         }
         return Hit_Z;
     }, {"ECAL_ECell_XYZ", "ntotal"})
-    /*
-    .Define("Hit_Theta", [] (vector<Double_t> Hit_X, vector<Double_t> Hit_Y, vector<Double_t> Hit_Z)
+    .Define("CellID", [] (vector<Double_t> Hit_X, vector<Double_t> Hit_Y, vector<Double_t> Hit_Z)
     {
-        vector<Double_t> theta = {};
-        for (Int_t i = 0; i < Hit_X.size(); i++)
+        vector<Int_t> CellID;
+        for (Int_t i = 0; i < Hit_X.size(); ++i)
         {
-            if (Hit_Z.at(i) == 0)
-                theta.emplace_back(PiOver2());
-            else
-            {
-                Double_t rho = Sqrt(Power(Hit_X.at(i), 2) + Power(Hit_Y.at(i), 2));
-                Double_t angle = ATan2(rho, Hit_Z.at(i));
-                theta.emplace_back(angle);
-            }
+            Int_t x = round(Hit_X.at(i) / CellX + nCellsXBias);
+            Int_t y = round(Hit_Y.at(i) / CellY + nCellsYBias);
+            Int_t z = round(Hit_Z.at(i) / CellZ);
+            Int_t index = 10000 * z + 100 * x + y;
+            CellID.emplace_back(index);
         }
-        return theta;
+        return CellID;
     }, {"Hit_X", "Hit_Y", "Hit_Z"})
-    .Define("Hit_Phi", [] (vector<Double_t> Hit_X, vector<Double_t> Hit_Y)
-    {
-        vector<Double_t> phi = {};
-        for (Int_t i = 0; i < Hit_X.size(); i++)
-        {
-            if (Hit_X.at(i) == 0)
-            {
-                if (Hit_Y.at(i) >= 0)
-                    phi.emplace_back(0);
-                else
-                    phi.emplace_back(Pi());
-            }
-            else
-            {
-                Double_t angle = ATan2(Hit_Y.at(i), Hit_X.at(i));
-                phi.emplace_back(angle);
-            }
-        }
-        return phi;
-    }, {"Hit_X", "Hit_Y"})
-    */
     .Define("Hit_Energy", [] (vector<Double_t> ECAL_ECell_XYZ, Int_t ntotal)
     {
         vector<Double_t> Hit_Energy;
@@ -145,6 +123,13 @@ Int_t Hits::OriginalHits(const string& file, const string& tree)
         }
         return Hit_Energy;
     }, {"ECAL_ECell_XYZ", "ntotal"})
+    .Define("Etotal", [] (vector<Double_t> Hit_Energy)
+    {
+        Double_t Etotal = 0.0;
+        for (Double_t i : Hit_Energy)
+            Etotal += i;
+        return Etotal;
+    }, {"Hit_Energy"})
     .Define("Eclus_max", [] (Int_t ECAL_Cluster_N, vector<Double_t> ECAL_Cluster_E)
     {
         Double_t Eclus_max = (ECAL_Cluster_N >= 1) ? ECAL_Cluster_E.at(0) : 0.0;
@@ -161,16 +146,70 @@ Int_t Hits::OriginalHits(const string& file, const string& tree)
         Double_t Eclus_max_sec_dist = (ECAL_Cluster_N >= 2) ? 0.1 * Sqrt(Power(ECAL_Cluster_X.at(0) - ECAL_Cluster_X.at(1), 2) + Power(ECAL_Cluster_Y.at(0) - ECAL_Cluster_Y.at(1), 2) + Power(ECAL_Cluster_Z.at(0) - ECAL_Cluster_Z.at(1), 2)) : 0.0;
         return Eclus_max_sec_dist;
     }, {"ECAL_Cluster_N", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z"})
+    .Define("clus_10", [] (vector<Double_t> ECAL_Cluster_E, Int_t ECAL_Cluster_N, Double_t Eclus_max)
+    {
+        Int_t clus_10 = ECAL_Cluster_N;
+        for (Int_t i = 0; i < ECAL_Cluster_N; ++i)
+            if (ECAL_Cluster_E.at(i) <= 0.1 * Eclus_max)
+                --clus_10;
+        return clus_10;
+    }, {"ECAL_Cluster_E", "ECAL_Cluster_N", "Eclus_max"})
+    .Define("clus_20", [] (vector<Double_t> ECAL_Cluster_E, Int_t ECAL_Cluster_N, Double_t Eclus_max)
+    {
+        Int_t clus_20 = ECAL_Cluster_N;
+        for (Int_t i = 0; i < ECAL_Cluster_N; ++i)
+            if (ECAL_Cluster_E.at(i) <= 0.2 * Eclus_max)
+                --clus_20;
+        return clus_20;
+    }, {"ECAL_Cluster_E", "ECAL_Cluster_N", "Eclus_max"})
+    .Define("clus_sub_10", [] (vector<Double_t> ECAL_ClusterSub_E, Int_t ECAL_ClusterSub_N)
+    {
+        Int_t clus_sub_10 = ECAL_ClusterSub_N;
+        for (Int_t i = 0; i < ECAL_ClusterSub_N; ++i)
+            if (ECAL_ClusterSub_E.at(i) <= 0.1 * ECAL_ClusterSub_E.at(0))
+                --clus_sub_10;
+        return clus_sub_10;
+    }, {"ECAL_ClusterSub_E", "ECAL_ClusterSub_N"})
+    .Define("clus_sub_20", [] (vector<Double_t> ECAL_ClusterSub_E, Int_t ECAL_ClusterSub_N)
+    {
+        Int_t clus_sub_20 = ECAL_ClusterSub_N;
+        for (Int_t i = 0; i < ECAL_ClusterSub_N; ++i)
+            if (ECAL_ClusterSub_E.at(i) <= 0.2 * ECAL_ClusterSub_E.at(0))
+                --clus_sub_20;
+        return clus_sub_20;
+    }, {"ECAL_ClusterSub_E", "ECAL_ClusterSub_N"})
+    .Define("clus_sub_match", [] (vector<Int_t> ECAL_ClusterSub_matchRecTrk)
+    {
+        Int_t clus_sub_match = 0;
+        for (Int_t i = 0; i < ECAL_ClusterSub_matchRecTrk.size(); ++i)
+            clus_sub_match += (ECAL_ClusterSub_matchRecTrk.at(i) >= 0);
+        return clus_sub_match;
+    }, {"ECAL_ClusterSub_matchRecTrk"})
+    .Define("clus_10_tot", [] (vector<Double_t> ECAL_Cluster_E, Int_t ECAL_Cluster_N, Double_t Etotal)
+    {
+        Int_t clus_10_tot = ECAL_Cluster_N;
+        for (Int_t i = 0; i < ECAL_Cluster_N; ++i)
+            if (ECAL_Cluster_E.at(i) <= 0.1 * Etotal)
+                --clus_10_tot;
+        return clus_10_tot;
+    }, {"ECAL_Cluster_E", "ECAL_Cluster_N", "Etotal"})
+    .Define("clus_20_tot", [] (vector<Double_t> ECAL_Cluster_E, Int_t ECAL_Cluster_N, Double_t Etotal)
+    {
+        Int_t clus_20_tot = ECAL_Cluster_N;
+        for (Int_t i = 0; i < ECAL_Cluster_N; ++i)
+            if (ECAL_Cluster_E.at(i) <= 0.2 * Etotal)
+                --clus_20_tot;
+        return clus_20_tot;
+    }, {"ECAL_Cluster_E", "ECAL_Cluster_N", "Etotal"})
     .Snapshot(tree, outname);
     delete dm;
 
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
-    t->SetBranchStatus("*", 0);
-//    vector<TString> remains = { "ECAL_Cluster_N", "Eclus_max", "Eclus_second", "Eclus_max_sec_diff", "Eclus_max_sec_dist", "EventNumber", "Hit_Energy", "Hit_Phi", "Hit_Theta", "Hit_X", "Hit_Y", "Hit_Z", "RunNumber" };
-    vector<TString> remains = { "ECAL_Cluster_N", "Eclus_max", "Eclus_second", "Eclus_max_sec_diff", "Eclus_max_sec_dist", "EventNumber", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z", "RunNumber" };
-    for (TString re : remains)
-        t->SetBranchStatus(re, 1);
+    t->SetBranchStatus("*", 1);
+    vector<TString> deactivate = { "ECAL_ClusterSub_E", "ECAL_ClusterSub_matchRecTrk", "ECAL_ClusterSub_X", "ECAL_ClusterSub_Y", "ECAL_ClusterSub_Z", "ECAL_Cluster_E", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z", "ECAL_ECell_XYZ" };
+    for (TString de : deactivate)
+        t->SetBranchStatus(de, 0);
     TFile* fnew = new TFile((TString) outname, "RECREATE");
     TTree* tnew = t->CloneTree();
     tnew->Write(0, TObject::kWriteDelete, 0);

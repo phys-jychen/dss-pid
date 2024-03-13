@@ -71,7 +71,7 @@ def plot(fname: str, tree: str, event_index: int, title: str, staggered: bool):
         WidthX = nCellX * CellWidthX
         WidthY = nCellY * CellWidthY
 
-    plt.gca().set_box_aspect((LayerThick * (nLayer + 1) / WidthX, 1, LayerThick * (nLayer + 1) / WidthY))
+    plt.gca().set_box_aspect((WidthX / (LayerThick * (nLayer + 1)), 1, WidthY / (LayerThick * (nLayer + 1))))
 
     for i in np.arange(nhits):
         if staggered:

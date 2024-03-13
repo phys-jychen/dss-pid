@@ -56,45 +56,45 @@ Int_t main(Int_t argc, Char_t* argv[])
         b->AddVar("COG_Z_mean",         'D');
 
         b->AddVar("E1E9",               'D');
-        b->AddVar("E1Edep",             'D');
-        b->AddVar("E25Edep",            'D');
-        b->AddVar("E49Edep",            'D');
-        b->AddVar("E9E25",              'D');
-        b->AddVar("E9E49",              'D');
-        b->AddVar("E9Edep",             'D');
-        b->AddVar("ECAL_Cluster_N",     'I');
-        b->AddVar("Ecell_max",          'D');
-        b->AddVar("Ecell_max_25",       'D');
-        b->AddVar("Ecell_max_49",       'D');
-        b->AddVar("Ecell_max_9",        'D');
+//        b->AddVar("E1Edep",             'D');
+//        b->AddVar("E25Edep",            'D');
+//        b->AddVar("E49Edep",            'D');
+//        b->AddVar("E9E25",              'D');
+//        b->AddVar("E9E49",              'D');
+//        b->AddVar("E9Edep",             'D');
+//        b->AddVar("ECAL_Cluster_N",     'I');
+//        b->AddVar("Ecell_max",          'D');
+//        b->AddVar("Ecell_max_25",       'D');
+//        b->AddVar("Ecell_max_49",       'D');
+//        b->AddVar("Ecell_max_9",        'D');
         b->AddVar("Ecell_second",       'D');
         b->AddVar("Eclus_max",          'D');
-        b->AddVar("Eclus_max_sec_diff", 'D');
-        b->AddVar("Eclus_max_sec_dist", 'D');
-        b->AddVar("Eclus_second",       'D');
+//        b->AddVar("Eclus_max_sec_diff", 'D');
+//        b->AddVar("Eclus_max_sec_dist", 'D');
+//        b->AddVar("Eclus_second",       'D');
         b->AddVar("Edep",               'D');
-        b->AddVar("Emax_sec_diff",      'D');
-        b->AddVar("Emax_sec_dist",      'D');
+//        b->AddVar("Emax_sec_diff",      'D');
+//        b->AddVar("Emax_sec_dist",      'D');
         b->AddVar("Emean",              'D');
 
         b->AddVar("FD_2D_mean",         'D');
-        b->AddVar("FD_2D_rms",          'D');
-        b->AddVar("FD_3D_mean",         'D');
-        b->AddVar("FD_3D_rms",          'D');
+//        b->AddVar("FD_2D_rms",          'D');
+//        b->AddVar("FD_3D_mean",         'D');
+//        b->AddVar("FD_3D_rms",          'D');
 
-        b->AddVar("hit_layer",          'I');
-        b->AddVar("nhits",              'I');
+//        b->AddVar("hit_layer",          'I');
+//        b->AddVar("nhits",              'I');
 //        b->AddVar("ntrack",             'I');
         b->AddVar("shower_density",     'D');
-        b->AddVar("shower_end",         'I');
-        b->AddVar("shower_layer",       'I');
-        b->AddVar("shower_layer_ratio", 'D');
-        b->AddVar("shower_length",      'I');
-        b->AddVar("shower_radius",      'D');
-        b->AddVar("shower_start",       'I');
-        b->AddVar("xwidth",             'D');
-        b->AddVar("ywidth",             'D');
-        b->AddVar("zdepth",             'D');
+//        b->AddVar("shower_end",         'I');
+//        b->AddVar("shower_layer",       'I');
+//        b->AddVar("shower_layer_ratio", 'D');
+//        b->AddVar("shower_length",      'I');
+//        b->AddVar("shower_radius",      'D');
+//        b->AddVar("shower_start",       'I');
+//        b->AddVar("xwidth",             'D');
+//        b->AddVar("ywidth",             'D');
+//        b->AddVar("zdepth",             'D');
 
         const Int_t energy_points = 200;
         string path = "/lustre/collider/chenjiyuan/dss-pid/run/e-signal/root/";
@@ -102,8 +102,8 @@ Int_t main(Int_t argc, Char_t* argv[])
         /* | Particle | Training  |    Test    |
          * | --------------------------------- |
          * |    e-    |  1--200   |  401--600  |
-         * |    pi-   | 201--400  |  601--800  |
-         * |   gamma  | 801--1000 | 1000--1200 |
+         * |   pi-    | 201--400  |  601--800  |
+         * |  gamma   | 801--1000 | 1000--1200 |
          */
 
         for (Int_t i = 1; i <= energy_points; ++i)
@@ -113,10 +113,10 @@ Int_t main(Int_t argc, Char_t* argv[])
             b->AddTestSig( path + "test/job" + to_string(400 + i) + "_e-_" + to_string(10 * i) + "MeV/e-_" + to_string(10 * i) + "MeV.root", tree);
 
             // Background
-            b->AddTrainBkg(path + "training/job" + to_string(800 + i) + "_gamma_" + to_string(10 * i) + "MeV/gamma_" + to_string(10 * i) + "MeV.root", tree);
-            b->AddTestBkg( path + "test/job" + to_string(1000 + i) + "_gamma_" + to_string(10 * i) + "MeV/gamma_" + to_string(10 * i) + "MeV.root", tree);
-//            b->AddTrainBkg(path + "training/job" + to_string(200 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
-//            b->AddTestBkg( path + "test/job" + to_string(600 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
+//            b->AddTrainBkg(path + "training/job" + to_string(800 + i) + "_gamma_" + to_string(10 * i) + "MeV/gamma_" + to_string(10 * i) + "MeV.root", tree);
+//            b->AddTestBkg( path + "test/job" + to_string(1000 + i) + "_gamma_" + to_string(10 * i) + "MeV/gamma_" + to_string(10 * i) + "MeV.root", tree);
+            b->AddTrainBkg(path + "training/job" + to_string(200 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
+            b->AddTestBkg( path + "test/job" + to_string(600 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
         }
 
         b->TrainBDT();
