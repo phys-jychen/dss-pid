@@ -36,6 +36,8 @@ def plot(fname: str, tree: str, event_index: int, title: str, staggered: bool):
     y_xy = np.array([])
     energy_xy = np.array([])
 
+    # TODO: Projection to other planes or axes
+
     # d_xz = dict()
     # x_xz = np.array([])
     # y_xz = np.array([])
