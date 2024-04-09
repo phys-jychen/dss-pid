@@ -12,11 +12,29 @@ Int_t PID::NewScale(const vector<Double_t>& pos_x, const vector<Double_t>& pos_y
     {
         Double_t x = pos_x.at(i);
         Double_t y = pos_y.at(i);
-        Double_t z = pos_z.at(i);
+        Int_t z = round(pos_z.at(i) / Thick);
+        Int_t tmpI, tmpJ;
 
-        Int_t tmpI = ((Int_t) (x / CellWidthX + nCellsXBias) + (Int_t) (Abs(x) / x)) / RatioX;
-        Int_t tmpJ = ((Int_t) (y / CellWidthY + nCellsYBias) + (Int_t) (Abs(y) / y)) / RatioY;
-        Int_t tmpK = (Int_t) (z / Thick) / RatioZ;
+        if (staggered)
+        {
+            if (z % 2 == 0)
+            {
+                tmpI = ((Int_t) round(x / CellWidthX + nCellsXBias - 0.25) + (Int_t) (Abs(x) / x)) / RatioX;
+                tmpJ = ((Int_t) round(y / CellWidthY + nCellsYBias - 0.25) + (Int_t) (Abs(y) / y)) / RatioY;
+            }
+            else
+            {
+                tmpI = ((Int_t) round(x / CellWidthX + nCellsXBias + 0.25) + (Int_t) (Abs(x) / x)) / RatioX;
+                tmpJ = ((Int_t) round(y / CellWidthY + nCellsYBias + 0.25) + (Int_t) (Abs(y) / y)) / RatioY;
+            }
+        }
+        else
+        {
+            tmpI = ((Int_t) round(x / CellWidthX + nCellsXBias) + (Int_t) (Abs(x) / x)) / RatioX;
+            tmpJ = ((Int_t) round(y / CellWidthY + nCellsYBias) + (Int_t) (Abs(y) / y)) / RatioY;
+        }
+
+        Int_t tmpK = z / RatioZ;
 
         Int_t NewCellID0 = (tmpK << 24) + (tmpJ << 12) + tmpI;
 
@@ -644,7 +662,6 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", true);
-//    vector<TString> deactivate = { "Ecell", "Ecell_max_id", "Ecell_second_id", "FD_2D", "FD_3D", "Hit_Energy", "Hit_Phi", "Hit_Theta", "Hit_X", "Hit_Y", "Hit_Z", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
     const vector<TString> deactivate = { "CellID", "Ecell", "Ecell_max_id", "Ecell_second_id", "FD_2D", "FD_3D", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
     for (const TString& de : deactivate)
         t->SetBranchStatus(de, false);
