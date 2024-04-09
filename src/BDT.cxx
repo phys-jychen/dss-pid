@@ -1,10 +1,6 @@
-#include "BDT.h"
+#include "PID.h"
 
-BDT::BDT() {}
-
-BDT::~BDT() {}
-
-Int_t BDT::TrainBDT()
+Int_t PID::TrainBDT()
 {
     TMVA::Tools::Instance();
 
@@ -13,31 +9,36 @@ Int_t BDT::TrainBDT()
     vector<TTree*> tesig;
     vector<TTree*> tebkg;
 
-    for (auto i : train_sig)
+    trsig.reserve(train_sig.size());
+    trbkg.reserve(train_bkg.size());
+    tesig.reserve(test_sig.size());
+    tebkg.reserve(test_bkg.size());
+
+    for (const auto& i : train_sig)
     {
         TFile* f = TFile::Open(i.first, "READ");
-        TTree* t = (TTree*) f->Get(i.second);
+        TTree* t = f->Get<TTree>(i.second);
         trsig.emplace_back(t);
     }
 
-    for (auto j : train_bkg)
+    for (const auto& j : train_bkg)
     {
         TFile* f = TFile::Open(j.first, "READ");
-        TTree* t = (TTree*) f->Get(j.second);
+        TTree* t = f->Get<TTree>(j.second);
         trbkg.emplace_back(t);
     }
 
-    for (auto k : test_sig)
+    for (const auto& k : test_sig)
     {
         TFile* f = TFile::Open(k.first, "READ");
-        TTree* t = (TTree*) f->Get(k.second);
+        TTree* t = f->Get<TTree>(k.second);
         tesig.emplace_back(t);
     }
 
-    for (auto l : test_bkg)
+    for (const auto& l : test_bkg)
     {
         TFile* f = TFile::Open(l.first, "READ");
-        TTree* t = (TTree*) f->Get(l.second);
+        TTree* t = f->Get<TTree>(l.second);
         tebkg.emplace_back(t);
     }
 
@@ -49,7 +50,7 @@ Int_t BDT::TrainBDT()
                                                "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=multiclass" );
 
     TMVA::DataLoader* dataloader = new TMVA::DataLoader("dataset");
-    for (auto i : var)
+    for (const auto& i : var)
         dataloader->AddVariable(i.first, i.second);
 
     // Signal and background trees should be added here
@@ -91,15 +92,12 @@ Int_t BDT::TrainBDT()
 
     delete factory;
     delete dataloader;
-
-    // Launch the GUI for the root macros
-//    if (!gROOT->IsBatch())
-//        TMVA::TMVAGui( outfileName );
+    Clear();
 
     return 0;	
 }
 
-Int_t BDT::BDTNtuple(const string& fname, const string& tname)
+Int_t PID::BDTNtuple(const string& fname, const string& tname)
 {
     EnableImplicitMT();
     string outname = fname;
@@ -150,7 +148,6 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 
     Float_t  bdt_hit_layer;
     Float_t  bdt_nhits;
-//    Float_t  bdt_ntrack;
     Float_t  bdt_shower_density;
     Float_t  bdt_shower_end;
     Float_t  bdt_shower_layer;
@@ -195,7 +192,6 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 
     reader->AddVariable("hit_layer",          &bdt_hit_layer);
     reader->AddVariable("nhits",              &bdt_nhits);
-//    reader->AddVariable("ntrack",             &bdt_ntrack);
     reader->AddVariable("shower_density",     &bdt_shower_density);
     reader->AddVariable("shower_end",         &bdt_shower_end);
     reader->AddVariable("shower_layer",       &bdt_shower_layer);
@@ -245,7 +241,6 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 
     rdf_input.emplace_back("hit_layer");
     rdf_input.emplace_back("nhits");
-//    rdf_input.emplace_back("ntrack");
     rdf_input.emplace_back("shower_density");
     rdf_input.emplace_back("shower_end");
     rdf_input.emplace_back("shower_layer");
@@ -290,7 +285,6 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
          Double_t FD_3D_rms,
          Int_t    hit_layer,
          Int_t    nhits,
-//         Int_t    ntrack,
          Double_t shower_density,
          Int_t    shower_end,
          Int_t    shower_layer,
@@ -300,7 +294,7 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
          Int_t    shower_start,
          Double_t xwidth,
          Double_t ywidth,
-         Double_t zdepth)
+         Double_t zdepth)->Float_t
     {
         bdt_COG_X_mean         = COG_X_mean;
         bdt_COG_Y_mean         = COG_Y_mean;
@@ -335,7 +329,6 @@ Int_t BDT::BDTNtuple(const string& fname, const string& tname)
 
         bdt_hit_layer          = hit_layer;
         bdt_nhits              = nhits;
-//        bdt_ntrack             = ntrack;
         bdt_shower_density     = shower_density;
         bdt_shower_end         = shower_end;
         bdt_shower_layer       = shower_layer;

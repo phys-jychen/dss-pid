@@ -1,8 +1,10 @@
 #! /bin/bash
 source /home/chenjiyuan/conda.env
 
+#Available modes: "display" for event display, and "projection" for energy projection. They must correspond to the names of the existing python files!
+mode="projection"
 energy=2000
-particle="pi-"
+particle="e-"
 
 if [ $particle = "e-" ]
 then
@@ -12,12 +14,16 @@ then
     job=$((energy / 10 + 200))
 fi
 
-filename="/lustre/collider/chenjiyuan/dss-pid/run/e-pi-/root/training/job${job}_${particle}_${energy}MeV/hit_sel_${particle}_${energy}MeV_ana.root"
+char="${mode:0:1}"
+upper="${char^^}"
+mode_upper="${upper}${mode:1}"
+
+filename="/lustre/collider/chenjiyuan/dss-pid/run/e-signal/root/training/job${job}_${particle}_${energy}MeV/hit_sel_${particle}_${energy}MeV_ana.root"
 #tree=dp
 #staggered=1
-event_index=925
+event_index=235
 save_dir="/lustre/collider/chenjiyuan/dss-pid/figs/"
-output="EventDisplay_${particle}_${energy}MeV.pdf"
+output="${mode_upper}_${particle}_${energy}MeV.pdf"
 #show=0
 
 title="${energy}-MeV "
@@ -50,5 +56,5 @@ then
     title+='$p$'
 fi
 
-#python display.py -f=$filename -i="$title" -e=$event_index -d=$save_dir -o=$output -s=$show
-python display.py -f=$filename -i="$title" -e=$event_index -d=$save_dir -o="$output"
+#python ${mode}.py -f=$filename -i="$title" -e=$event_index -d=$save_dir -o=$output -s=$show
+python ${mode}.py -f=$filename -i="$title" -e=$event_index -d=$save_dir -o="$output"

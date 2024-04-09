@@ -2,13 +2,12 @@ import uproot as up
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm, colors
-from mpl_toolkits.mplot3d import Axes3D
 import argparse
 from os.path import join
 
 CellWidthX = 2.5
 CellWidthY = 2.5
-LayerThick = 4.0
+LayerThick = 4
 nCellX = 21
 nCellY = 21
 nLayer = 11
@@ -39,18 +38,18 @@ def read_file(fname: str, tree: str, event_index: int, staggered: bool):
                 if z[i] % 2 == 0:
                     x[i] = np.round(xtemp[i] / CellWidthX - 0.25).astype(int)
                     y[i] = np.round(ytemp[i] / CellWidthY - 0.25).astype(int)
-#                    if abs(xtemp[i] / CellWidthX - 0.25) >= 10 or abs(ytemp[i] / CellWidthY - 0.25) >= 10:
-#                        print(xtemp[i] / CellWidthX - 0.25, ytemp[i] / CellWidthY - 0.25)
+                    # if abs(xtemp[i] / CellWidthX - 0.25) >= 10 or abs(ytemp[i] / CellWidthY - 0.25) >= 10:
+                    #     print(xtemp[i] / CellWidthX - 0.25, ytemp[i] / CellWidthY - 0.25)
                 else:
                     x[i] = np.round(xtemp[i] / CellWidthX + 0.25).astype(int)
                     y[i] = np.round(ytemp[i] / CellWidthY + 0.25).astype(int)
-#                    if abs(xtemp[i] / CellWidthX + 0.25) >= 10 or abs(ytemp[i] / CellWidthY + 0.25) >= 10:
-#                        print(xtemp[i] / CellWidthX + 0.25, ytemp[i] / CellWidthY + 0.25)
+                    # if abs(xtemp[i] / CellWidthX + 0.25) >= 10 or abs(ytemp[i] / CellWidthY + 0.25) >= 10:
+                    #     print(xtemp[i] / CellWidthX + 0.25, ytemp[i] / CellWidthY + 0.25)
         else:
             x[i] = np.round(xtemp[i] / CellWidthX).astype(int)
             y[i] = np.round(ytemp[i] / CellWidthY).astype(int)
 
-        znew, ynew, xnew, enew = (np.array(a) for a in zip(*sorted(zip(z, y, x, energy), reverse = True)))
+        znew, ynew, xnew, enew = (np.array(a) for a in zip(*sorted(zip(z, y, x, energy), reverse=True)))
 
         return xnew, ynew, znew, enew
 
@@ -61,56 +60,91 @@ def plot(fname: str, tree: str, event_index: int, title: str, staggered: bool):
 
     nhits = len(x)
 
-    fig, ax = plt.subplots(subplot_kw={'projection': '3d'})
+    WidthX = (nCellX + 0.5 * staggered) * CellWidthX
+    WidthY = (nCellY + 0.5 * staggered) * CellWidthY
+
+    # if staggered:
+    #     WidthX = (nCellX + 0.5) * CellWidthX
+    #     WidthY = (nCellY + 0.5) * CellWidthY
+    # else:
+    #     WidthX = nCellX * CellWidthX
+    #     WidthY = nCellY * CellWidthY
+
+    ratioX = WidthX / (LayerThick * (nLayer + 1))
+    ratioY = 1
+    ratioZ = WidthY / (LayerThick * (nLayer + 1))
+
+    fig = plt.figure()
+    spec = fig.add_gridspec(2, 2)
+
+    ax_xz = fig.add_subplot(spec[0, 1], projection='3d')
+    plt.gca().set_box_aspect((ratioX, ratioY, ratioZ))
+    ax_xy = fig.add_subplot(spec[1, 1], projection='3d')
+    plt.gca().set_box_aspect((ratioX, ratioY, ratioZ))
+    ax = fig.add_subplot(spec[:, 0], projection='3d')
+    plt.gca().set_box_aspect((ratioX, ratioY, ratioZ))
+
     cmap = cm.OrRd
 
-    if staggered:
-        WidthX = (nCellX + 0.5) * CellWidthX
-        WidthY = (nCellY + 0.5) * CellWidthY
-    else:
-        WidthX = nCellX * CellWidthX
-        WidthY = nCellY * CellWidthY
-
-    plt.gca().set_box_aspect((WidthX / (LayerThick * (nLayer + 1)), 1, WidthY / (LayerThick * (nLayer + 1))))
-
     for i in np.arange(nhits):
-        if staggered:
-            if z[i] % 2 == 0:
-                xnew = np.arange(x[i] - 1, x[i] + 1) + 0.75
-                ynew = np.arange(y[i] - 1, y[i] + 1) + 0.75
-            else:
-                xnew = np.arange(x[i] - 1, x[i] + 1) + 0.25
-                ynew = np.arange(y[i] - 1, y[i] + 1) + 0.25
+        if z[i] % 2 == 0:
+            xnew = np.arange(x[i] - 1, x[i] + 1) + 0.75 * staggered
+            ynew = np.arange(y[i] - 1, y[i] + 1) + 0.75 * staggered
         else:
-            xnew = np.arange(x[i] - 1, x[i] + 1)
-            ynew = np.arange(y[i] - 1, y[i] + 1)
+            xnew = np.arange(x[i] - 1, x[i] + 1) + 0.25 * staggered
+            ynew = np.arange(y[i] - 1, y[i] + 1) + 0.25 * staggered
+        # if staggered:
+        #     if z[i] % 2 == 0:
+        #         xnew = np.arange(x[i] - 1, x[i] + 1) + 0.75
+        #         ynew = np.arange(y[i] - 1, y[i] + 1) + 0.75
+        #     else:
+        #         xnew = np.arange(x[i] - 1, x[i] + 1) + 0.25
+        #         ynew = np.arange(y[i] - 1, y[i] + 1) + 0.25
+        # else:
+        #     xnew = np.arange(x[i] - 1, x[i] + 1)
+        #     ynew = np.arange(y[i] - 1, y[i] + 1)
 
         xnew, ynew = np.meshgrid(xnew, ynew)
         znew = z[i] * np.ones(xnew.shape)
         enew = energy_norm[i] * np.ones(xnew.shape)
 
-        ax.plot_surface(xnew, znew, ynew, cmap=cmap, facecolors=cmap(enew), edgecolor='k', alpha=0.8, lw=0.05, rstride=1, cstride=1, antialiased=False)
+        for axis in (ax, ax_xz, ax_xy):
+            axis.plot_surface(xnew, znew, ynew, cmap=cmap, facecolors=cmap(enew), edgecolor='k', alpha=0.8, lw=0.05, rstride=1, cstride=1, antialiased=False)
 
-    ax.set_xlim(-0.5 * nCellX, 0.5 * nCellY)
-    ax.set_ylim(0, nLayer + 1)
-    ax.set_zlim(-0.5 * nCellY, 0.5 * nCellY)
-    ax.set_xticks(np.linspace(-10, 10, 5), CellWidthX * np.linspace(-10, 10, 5))
-    ax.set_yticks(np.linspace(0, nLayer + 1, 5))
-    ax.set_zticks(np.linspace(-10, 10, 5), CellWidthY * np.linspace(-10, 10, 5))
-    ax.set_aspect(aspect='equalxz')
-    ax.grid(False)
+    for axis in (ax, ax_xz, ax_xy):
+        axis.set_xlim(-0.5 * nCellX, 0.5 * nCellY)
+        axis.set_ylim(0, nLayer)
+        axis.set_zlim(-0.5 * nCellY, 0.5 * nCellY)
+        axis.set_aspect(aspect='equalxz')
+        axis.grid(False)
+
+        axis.invert_xaxis()
+
+        if axis == ax:
+            axis.set_xticks(np.linspace(-10, 10, 5), CellWidthX * np.linspace(-10, 10, 5))
+            axis.set_yticks(np.linspace(0, nLayer + 1, 5))
+            axis.set_zticks(np.linspace(-10, 10, 5), CellWidthY * np.linspace(-10, 10, 5))
+            axis.set_xlabel("X [cm]", size='x-large')
+            axis.set_ylabel("Z [layer]", size='x-large')
+            axis.set_zlabel("Y [cm]", size='x-large')
+
+            m = plt.cm.ScalarMappable(cmap=cmap)
+            m.set_array(energy)
+            plt.colorbar(m, pad=0.2, ax=plt.gca(), orientation='horizontal').set_label(label="Hit Energy [MeV]", size='large')
+        else:
+            axis.set_xticks([])
+            axis.set_yticks([])
+            axis.set_zticks([])
+
+    ax_xz.set_xlabel("X", size='large', labelpad=-10)
+    ax_xz.set_ylabel("Z", size='large', labelpad=-10)
+    ax_xy.set_xlabel("X", size='large', labelpad=-10)
+    ax_xy.set_zlabel("Y", size='large', labelpad=-10)
 
     fig.suptitle(title, size='xx-large')
-    ax.invert_xaxis()
-    ax.set_xlabel("X [cm]", size='x-large')
-    ax.set_ylabel("Z [layer]", size='x-large')
-    ax.set_zlabel("Y [cm]", size='x-large')
-
-    m = plt.cm.ScalarMappable(cmap=cmap)
-    m.set_array(energy)
-    plt.colorbar(m, pad=0.2, ax=plt.gca()).set_label(label="Hit Energy [MeV]", size='x-large')
-
     ax.view_init(elev=20, azim=-35, roll=0)
+    ax_xz.view_init(elev=90, azim=0, roll=0)
+    ax_xy.view_init(elev=0, azim=-90, roll=0)
 
 
 if __name__ == '__main__':
@@ -138,8 +172,8 @@ if __name__ == '__main__':
     plot(filename, tree, event_index, title, staggered)
 
     if save_dir and output:
-        plt.savefig(join(save_dir, output))
-        print("Figure", join(save_dir, output), "successfully created!")
+        plt.savefig(join(save_dir, output), bbox_inches='tight')
+        print("Figure ", join(save_dir, output), " successfully created!")
 
     if show:
         plt.show()

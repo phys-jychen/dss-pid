@@ -3,7 +3,7 @@ bin/
 build/
 run/
 figs/
-cmake-build-debug/
+cmake-build*/
 
 # Files:
-.clion.source.upload.marker
+.clion*

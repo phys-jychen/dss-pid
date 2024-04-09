@@ -24,14 +24,10 @@ include_directories(./src)
 include(${ROOT_USE_FILE})
 
 # Add executables
-add_executable(iBDT bdt.cxx src/BDT.cxx)
-add_executable(iHit hit.cxx src/Hits.cxx)
-add_executable(iRec rec.cxx src/Variables.cxx src/Hough.cxx)
+add_executable(iPID pid.cxx src/BDT.cxx src/Hits.cxx src/Variables.cxx)
 
 # Link libraries
-target_link_libraries(iBDT ${ROOT_LIBRARIES})
-target_link_libraries(iHit ${ROOT_LIBRARIES})
-target_link_libraries(iRec ${ROOT_LIBRARIES})
+target_link_libraries(iPID ${ROOT_LIBRARIES})
 
 # Add commands to set up the environment with the help of setup.sh...
 execute_process(COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/config/setup.sh ${PROJECT_BINARY_DIR})
