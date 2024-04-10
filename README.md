@@ -76,14 +76,14 @@ iPID -c -f [file] -t [tree]
 
 Then, the BDT response is stored in the output ROOT file, whose name has a prefix ‘bdt’, in your current directory. While modifying `src/BDT.cxx`, make sure that the input variables are identical to those in `bdt.cxx`, including the order!
 
-### Event Display and Energy Porjection
+### Event Display and Energy Projection
 In the directory you have installed, run
 ```shell
 ./event_display.sh
 ```
-to obtain a figure of event display or energy projection (on $xOy$ plane), which will be saved in a directory assigned in this shell script (default: `figs/`).
+to obtain a figure of event display or two figures of energy projection (on three axes and three primary projection planes), which will be saved in a directory assigned in this shell script.
 
-You can modify `event_display.sh` to meet your own needs: display type (event display or energy projection), input ROOT file, tree name, title of the figure, ID of the event, directory to save the output file, name of the output file, and instantly show the figure or not.
+You can modify this shell script to meet your own needs: display type (event display or energy projection), input ROOT file, tree name, title of the figure, ID of the event, directory to save the output file, name of the output file, and instantly show the figure or not.
 
 ## Environment Set-up
 This project requires CMake version >= 3.17. If you are working on the cluster of INPAC, IHEP, etc., the environment can be easily set up by simply executing
@@ -122,5 +122,8 @@ source <build_dir>/setup.sh
 
 By now, the compilation have been finished. Prepare your datasets, and have fun! :relaxed:
 
+## To-Do
+Definitions of some variables need further check.
+
 ## Reference
-The framework of this project comes from [ahcal-pid](https://github.com/phys-jychen/ahcal-pid). Since their structures are largely different, the definitions of most of the variables have been modified.
+The framework of this project comes from [ahcal-pid](https://github.com/phys-jychen/ahcal-pid). Since their structures are largely different, the definitions of most of the variables have been modified. Besides, the execution has been greatly simplified.
