@@ -110,6 +110,7 @@ def plot(fname: str, tree: str, event_index: int, title: str, staggered: bool):
 
         for axis in (ax, ax_xz, ax_xy):
             axis.plot_surface(xnew, znew, ynew, cmap=cmap, facecolors=cmap(enew), edgecolor='k', alpha=0.8, lw=0.05, rstride=1, cstride=1, antialiased=False)
+            ax.computed_zorder = False
 
     for axis in (ax, ax_xz, ax_xy):
         axis.set_xlim(-0.5 * nCellX, 0.5 * nCellY)

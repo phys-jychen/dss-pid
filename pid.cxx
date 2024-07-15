@@ -53,7 +53,7 @@ Int_t main(Int_t argc, Char_t* argv[])
         else if (string(argv[i]) == string("-r"))
             rec = 1;
 
-        else if (string(argv[i]) == string("-v"))
+        else if (string(argv[i]) == string("-b"))
             bdt = 1;
 
         else if (string(argv[i]) == string("-c"))
@@ -130,7 +130,6 @@ Int_t main(Int_t argc, Char_t* argv[])
 
         p->AddVar("hit_layer",          'I');
         p->AddVar("nhits",              'I');
-        p->AddVar("ntrack",             'I');
         p->AddVar("shower_density",     'D');
         p->AddVar("shower_end",         'I');
         p->AddVar("shower_layer",       'I');
