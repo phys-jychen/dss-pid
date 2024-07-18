@@ -28,7 +28,15 @@
 #include "TMVA/DataLoader.h"
 #include "TMVA/Tools.h"
 
-using namespace std;
+using std::string;
+using std::vector;
+using std::map;
+using std::unordered_map;
+using std::pair;
+using std::to_string;
+using std::cout;
+using std::endl;
+
 using namespace ROOT;
 using namespace TMath;
 
@@ -49,7 +57,8 @@ const Double_t nCellsXBias = 0.5 * (nCellsX - 1);
 const Double_t nCellsYBias = 0.5 * (nCellsY - 1);
 
 // Staggered structure
-const Bool_t staggered = true;
+const Bool_t staggered_x = true;
+const Bool_t staggered_y = true;
 
 class PID
 {

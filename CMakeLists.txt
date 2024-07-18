@@ -3,7 +3,7 @@
 #----------------------------------------
 
 # Minimum version of CMake
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 #set(CMAKE_CXX_STANDARD 17)
 
 # Name and version of the project
@@ -24,7 +24,11 @@ include_directories(./src)
 include(${ROOT_USE_FILE})
 
 # Add executables
-add_executable(iPID pid.cxx src/BDT.cxx src/Hits.cxx src/Variables.cxx)
+add_executable(iPID pid.cxx src/BDT.cxx
+                            src/Hits.cxx
+                            src/Variables.cxx
+                            src/Fit3D.cpp
+)
 
 # Link libraries
 target_link_libraries(iPID ${ROOT_LIBRARIES})

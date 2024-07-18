@@ -40,7 +40,7 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
                 continue;
             Int_t layer = i / (nCellsX * nCellsY);
             Double_t x = (i % nCellsX - nCellsXBias) * CellWidthX;
-            if (staggered)
+            if (staggered_x)
             {
                 if (layer % 2 == 0)
                     x += 0.25 * CellWidthX;
@@ -60,7 +60,7 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
                 continue;
             Int_t layer = i / (nCellsX * nCellsY);
             Double_t y = ((i % (nCellsX * nCellsY)) / nCellsX - nCellsYBias) * CellWidthY;
-            if (staggered)
+            if (staggered_y)
             {
                 if (layer % 2 == 0)
                     y += 0.25 * CellWidthY;

@@ -119,18 +119,18 @@ Int_t PID::BDTNtuple(const string& fname, const string& tname)
     Float_t  bdt_COG_Y_mean;
     Float_t  bdt_COG_Z_mean;
 
-    Float_t  bdt_E1E9;
+    Float_t  bdt_E1E3;
     Float_t  bdt_E1Edep;
-    Float_t  bdt_E25Edep;
-    Float_t  bdt_E49Edep;
-    Float_t  bdt_E9E25;
-    Float_t  bdt_E9E49;
-    Float_t  bdt_E9Edep;
+    Float_t  bdt_E3E5;
+    Float_t  bdt_E3E7;
+    Float_t  bdt_E3Edep;
+    Float_t  bdt_E5Edep;
+    Float_t  bdt_E7Edep;
     Float_t  bdt_ECAL_Cluster_N;
     Float_t  bdt_Ecell_max;
-    Float_t  bdt_Ecell_max_25;
-    Float_t  bdt_Ecell_max_49;
-    Float_t  bdt_Ecell_max_9;
+    Float_t  bdt_Ecell_max_3;
+    Float_t  bdt_Ecell_max_5;
+    Float_t  bdt_Ecell_max_7;
     Float_t  bdt_Ecell_second;
     Float_t  bdt_Eclus_max;
     Float_t  bdt_Eclus_max_sec_diff;
@@ -163,18 +163,18 @@ Int_t PID::BDTNtuple(const string& fname, const string& tname)
     reader->AddVariable("COG_Y_mean",         &bdt_COG_Y_mean);
     reader->AddVariable("COG_Z_mean",         &bdt_COG_Z_mean);
 
-    reader->AddVariable("E1E9",               &bdt_E1E9);
+    reader->AddVariable("E1E3",               &bdt_E1E3);
     reader->AddVariable("E1Edep",             &bdt_E1Edep);
-    reader->AddVariable("E25Edep",            &bdt_E25Edep);
-    reader->AddVariable("E49Edep",            &bdt_E49Edep);
-    reader->AddVariable("E9E25",              &bdt_E9E25);
-    reader->AddVariable("E9E49",              &bdt_E9E49);
-    reader->AddVariable("E9Edep",             &bdt_E9Edep);
+    reader->AddVariable("E3E5",               &bdt_E3E5);
+    reader->AddVariable("E3E7",               &bdt_E3E7);
+    reader->AddVariable("E3Edep",             &bdt_E3Edep);
+    reader->AddVariable("E5Edep",             &bdt_E5Edep);
+    reader->AddVariable("E7Edep",             &bdt_E7Edep);
     reader->AddVariable("ECAL_Cluster_N",     &bdt_ECAL_Cluster_N);
     reader->AddVariable("Ecell_max",          &bdt_Ecell_max);
-    reader->AddVariable("Ecell_max_25",       &bdt_Ecell_max_25);
-    reader->AddVariable("Ecell_max_49",       &bdt_Ecell_max_49);
-    reader->AddVariable("Ecell_max_9",        &bdt_Ecell_max_9);
+    reader->AddVariable("Ecell_max_3",        &bdt_Ecell_max_3);
+    reader->AddVariable("Ecell_max_5",        &bdt_Ecell_max_5);
+    reader->AddVariable("Ecell_max_7",        &bdt_Ecell_max_7);
     reader->AddVariable("Ecell_second",       &bdt_Ecell_second);
     reader->AddVariable("Eclus_max",          &bdt_Eclus_max);
     reader->AddVariable("Eclus_max_sec_diff", &bdt_Eclus_max_sec_diff);
@@ -212,18 +212,18 @@ Int_t PID::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("COG_Y_mean");
     rdf_input.emplace_back("COG_Z_mean");
 
-    rdf_input.emplace_back("E1E9");
+    rdf_input.emplace_back("E1E3");
     rdf_input.emplace_back("E1Edep");
-    rdf_input.emplace_back("E25Edep");
-    rdf_input.emplace_back("E49Edep");
-    rdf_input.emplace_back("E9E25");
-    rdf_input.emplace_back("E9E49");
-    rdf_input.emplace_back("E9Edep");
+    rdf_input.emplace_back("E3E5");
+    rdf_input.emplace_back("E3E7");
+    rdf_input.emplace_back("E3Edep");
+    rdf_input.emplace_back("E5Edep");
+    rdf_input.emplace_back("E7Edep");
     rdf_input.emplace_back("ECAL_Cluster_N");
     rdf_input.emplace_back("Ecell_max");
-    rdf_input.emplace_back("Ecell_max_25");
-    rdf_input.emplace_back("Ecell_max_49");
-    rdf_input.emplace_back("Ecell_max_9");
+    rdf_input.emplace_back("Ecell_max_3");
+    rdf_input.emplace_back("Ecell_max_5");
+    rdf_input.emplace_back("Ecell_max_7");
     rdf_input.emplace_back("Ecell_second");
     rdf_input.emplace_back("Eclus_max");
     rdf_input.emplace_back("Eclus_max_sec_diff");
@@ -258,18 +258,18 @@ Int_t PID::BDTNtuple(const string& fname, const string& tname)
         (Double_t COG_X_mean,
          Double_t COG_Y_mean,
          Double_t COG_Z_mean,
-         Double_t E1E9,
+         Double_t E1E3,
          Double_t E1Edep,
-         Double_t E25Edep,
-         Double_t E49Edep,
-         Double_t E9E25,
-         Double_t E9E49,
-         Double_t E9Edep,
+         Double_t E3E5,
+         Double_t E3E7,
+         Double_t E3Edep,
+         Double_t E5Edep,
+         Double_t E7Edep,
          Int_t    ECAL_Cluster_N,
          Double_t Ecell_max,
-         Double_t Ecell_max_25,
-         Double_t Ecell_max_49,
-         Double_t Ecell_max_9,
+         Double_t Ecell_max_3,
+         Double_t Ecell_max_5,
+         Double_t Ecell_max_7,
          Double_t Ecell_second,
          Double_t Eclus_max,
          Double_t Eclus_max_sec_diff,
@@ -300,18 +300,18 @@ Int_t PID::BDTNtuple(const string& fname, const string& tname)
         bdt_COG_Y_mean         = COG_Y_mean;
         bdt_COG_Z_mean         = COG_Z_mean;
 
-        bdt_E1E9               = E1E9;
+        bdt_E1E3               = E1E3;
         bdt_E1Edep             = E1Edep;
-        bdt_E25Edep            = E25Edep;
-        bdt_E49Edep            = E49Edep;
-        bdt_E9E25              = E9E25;
-        bdt_E9E49              = E9E49;
-        bdt_E9Edep             = E9Edep;
+        bdt_E3E5               = E3E5;
+        bdt_E3E7               = E3E7;
+        bdt_E3Edep             = E3Edep;
+        bdt_E5Edep             = E5Edep;
+        bdt_E7Edep             = E7Edep;
         bdt_ECAL_Cluster_N     = ECAL_Cluster_N;
         bdt_Ecell_max          = Ecell_max;
-        bdt_Ecell_max_25       = Ecell_max_25;
-        bdt_Ecell_max_49       = Ecell_max_49;
-        bdt_Ecell_max_9        = Ecell_max_9;
+        bdt_Ecell_max_3        = Ecell_max_3;
+        bdt_Ecell_max_5        = Ecell_max_5;
+        bdt_Ecell_max_7        = Ecell_max_7;
         bdt_Ecell_second       = Ecell_second;
         bdt_Eclus_max          = Eclus_max;
         bdt_Eclus_max_sec_diff = Eclus_max_sec_diff;

@@ -1,7 +1,5 @@
 #include "PID.h"
 
-using namespace std;
-
 Int_t main(Int_t argc, Char_t* argv[])
 {
     string file, tree = "dp";
@@ -101,18 +99,18 @@ Int_t main(Int_t argc, Char_t* argv[])
         p->AddVar("COG_Y_mean",         'D');
         p->AddVar("COG_Z_mean",         'D');
 
-        p->AddVar("E1E9",               'D');
+        p->AddVar("E1E3",               'D');
         p->AddVar("E1Edep",             'D');
-        p->AddVar("E25Edep",            'D');
-        p->AddVar("E49Edep",            'D');
-        p->AddVar("E9E25",              'D');
-        p->AddVar("E9E49",              'D');
-        p->AddVar("E9Edep",             'D');
+        p->AddVar("E3E5",               'D');
+        p->AddVar("E3E7",               'D');
+        p->AddVar("E3Edep",             'D');
+        p->AddVar("E5Edep",             'D');
+        p->AddVar("E7Edep",             'D');
         p->AddVar("ECAL_Cluster_N",     'I');
         p->AddVar("Ecell_max",          'D');
-        p->AddVar("Ecell_max_25",       'D');
-        p->AddVar("Ecell_max_49",       'D');
-        p->AddVar("Ecell_max_9",        'D');
+        p->AddVar("Ecell_max_3",        'D');
+        p->AddVar("Ecell_max_5",        'D');
+        p->AddVar("Ecell_max_7",        'D');
         p->AddVar("Ecell_second",       'D');
         p->AddVar("Eclus_max",          'D');
         p->AddVar("Eclus_max_sec_diff", 'D');

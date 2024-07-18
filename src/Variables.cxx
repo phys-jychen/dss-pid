@@ -1,49 +1,31 @@
 #include "PID.h"
+#include "Fit3D.h"
 
-Int_t PID::NewScale(const vector<Double_t>& pos_x, const vector<Double_t>& pos_y, const vector<Double_t>& pos_z, const Int_t& RatioX, const Int_t& RatioY, const Int_t& RatioZ)
+Int_t PID::NewScale(const vector<Double_t>& hit_x, const vector<Double_t>& hit_y, const vector<Double_t>& hit_z, const Int_t& ratio_x, const Int_t& ratio_y, const Int_t& ratio_z)
 {
-    const Int_t NumHit = pos_x.size();
-    assert(NumHit == pos_y.size());
-    assert(NumHit == pos_z.size());
+    const Int_t nhits = hit_x.size();
+    assert(nhits == hit_y.size());
+    assert(nhits == hit_z.size());
 
-    unordered_map<Int_t, Int_t> testIDtoEnergy;
+    unordered_map<Int_t, Int_t> ID_hit_map;
 
-    for (Int_t i = 0; i < NumHit; ++i)
+    for (Int_t i = 0; i < nhits; ++i)
     {
-        Double_t x = pos_x.at(i);
-        Double_t y = pos_y.at(i);
-        Int_t z = round(pos_z.at(i) / Thick);
-        Int_t tmpI, tmpJ;
+        const Double_t x = hit_x.at(i);
+        const Double_t y = hit_y.at(i);
+        const Int_t z = round(hit_z.at(i) / Thick);
 
-        if (staggered)
-        {
-            if (z % 2 == 0)
-            {
-                tmpI = ((Int_t) round(x / CellWidthX + nCellsXBias - 0.25) + (Int_t) (Abs(x) / x)) / RatioX;
-                tmpJ = ((Int_t) round(y / CellWidthY + nCellsYBias - 0.25) + (Int_t) (Abs(y) / y)) / RatioY;
-            }
-            else
-            {
-                tmpI = ((Int_t) round(x / CellWidthX + nCellsXBias + 0.25) + (Int_t) (Abs(x) / x)) / RatioX;
-                tmpJ = ((Int_t) round(y / CellWidthY + nCellsYBias + 0.25) + (Int_t) (Abs(y) / y)) / RatioY;
-            }
-        }
-        else
-        {
-            tmpI = ((Int_t) round(x / CellWidthX + nCellsXBias) + (Int_t) (Abs(x) / x)) / RatioX;
-            tmpJ = ((Int_t) round(y / CellWidthY + nCellsYBias) + (Int_t) (Abs(y) / y)) / RatioY;
-        }
+        const Int_t supercellID_x = (Int_t) round(x / CellWidthX + nCellsXBias - (0.25 - 0.5 * (z % 2 == 1)) * staggered_x) / ratio_x;
+        const Int_t supercellID_y = (Int_t) round(y / CellWidthY + nCellsYBias - (0.25 - 0.5 * (z % 2 == 1)) * staggered_y) / ratio_y;
+        const Int_t supercellID_z = z / ratio_z;
+        const Int_t CellID_new = 10000 * supercellID_z + 100 * supercellID_y + supercellID_x;
 
-        Int_t tmpK = z / RatioZ;
-
-        Int_t NewCellID0 = (tmpK << 24) + (tmpJ << 12) + tmpI;
-
-        ++testIDtoEnergy[NewCellID0];
+        ++ID_hit_map[CellID_new];
     }
 
-    Int_t ReScaledNH = testIDtoEnergy.size();
-    testIDtoEnergy.clear();
-    return ReScaledNH;
+    const Int_t nhits_new = ID_hit_map.size();
+    ID_hit_map.clear();
+    return nhits_new;
 }
 
 Int_t PID::GenNtuple(const string& file, const string& tree)
@@ -146,7 +128,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         TH1D* h1 = new TH1D("h1", "", 120, -30, 30);
         for (Double_t i : Hit_X)
             h1->Fill(i - COG_X_mean);
-        Double_t xwidth = h1->GetRMS();
+        const Double_t xwidth = h1->GetRMS();
         delete h1;
         return xwidth;
     }, {"Hit_X", "COG_X_mean"})
@@ -156,7 +138,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         TH1D* h1 = new TH1D("h1", "", 120, -30, 30);
         for (Double_t i : Hit_Y)
             h1->Fill(i - COG_Y_mean);
-        Double_t ywidth = h1->GetRMS();
+        const Double_t ywidth = h1->GetRMS();
         delete h1;
         return ywidth;
     }, {"Hit_Y", "COG_Y_mean"})
@@ -166,52 +148,35 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         TH1D* h1 = new TH1D("h1", "", nLayer + 1, 0, (nLayer + 1) * Thick);
         for (Double_t i : Hit_Z)
             h1->Fill(i);
-        Double_t zdepth = h1->GetRMS();
+        const Double_t zdepth = h1->GetRMS();
         delete h1;
         return zdepth;
     }, {"Hit_Z"})
-    // The energy deposition of the fired cells
-    .Define("Ecell", [] (const vector<Int_t>& CellID, const vector<Double_t>& Hit_Energy, const Int_t& nhits)->vector<vector<Double_t>>
-    {
-        unordered_map<Int_t, Double_t> Ecell_map;
-        vector<vector<Double_t>> Ecell = { {}, {} };
-        for (Int_t i = 0; i < nhits; ++i)
-        {
-            Int_t index = CellID.at(i);
-            Ecell_map[index] += Hit_Energy.at(i);
-        }
-        for (auto it : Ecell_map)
-        {
-            Ecell.at(0).emplace_back(it.first);
-            Ecell.at(1).emplace_back(it.second);
-        }
-        return Ecell;
-    }, {"CellID", "Hit_Energy", "nhits"})
     // The maximum energy deposition as well as its ID
-    .Define("Ecell_max_id", [] (const vector<vector<Double_t>>& Ecell, const Int_t& nhits)->vector<Double_t>
+    .Define("Ecell_max_id", [] (const vector<Int_t>& CellID, const vector<Double_t>& Hit_Energy, const Int_t& nhits)->vector<Double_t>
     {
-        vector<Double_t> Ecell_max_id = { (Double_t) nhits, 0.0 };
+        vector<Double_t> Ecell_max_id = { 0.0, 0.0 };    // Index 0 for cell ID, index 1 for cell energy
         for (Int_t i = 0; i < nhits; ++i)
-            if (Ecell.at(1).at(i) > Ecell_max_id.at(1))
+            if (Hit_Energy.at(i) > Ecell_max_id.at(1))
             {
-                Ecell_max_id.at(0) = Ecell.at(0).at(i);
-                Ecell_max_id.at(1) = Ecell.at(1).at(i);
+                Ecell_max_id.at(0) = CellID.at(i);
+                Ecell_max_id.at(1) = Hit_Energy.at(i);
             }
         return Ecell_max_id;
-    }, {"Ecell", "nhits"})
+    }, {"CellID", "Hit_Energy", "nhits"})
     .Define("Ecell_max", "Ecell_max_id[1]")
     // The second largest energy deposition as well as its ID
-    .Define("Ecell_second_id", [] (const vector<vector<Double_t>>& Ecell, const Int_t& nhits, const Double_t& Ecell_max)->vector<Double_t>
+    .Define("Ecell_second_id", [] (const vector<Int_t>& CellID, const vector<Double_t>& Hit_Energy, const Int_t& nhits, const Double_t& Ecell_max)->vector<Double_t>
     {
-        vector<Double_t> Ecell_second_id = { (Double_t) nhits, 0.0 };
+        vector<Double_t> Ecell_second_id = { 0.0, 0.0 };    // Index 0 for cell ID, index 1 for cell energy
         for (Int_t i = 0; i < nhits; ++i)
-            if (Ecell.at(1).at(i) > Ecell_second_id.at(1) && Ecell.at(1).at(i) < Ecell_max)
+            if (Hit_Energy.at(i) > Ecell_second_id.at(1) && Hit_Energy.at(i) < Ecell_max)
             {
-                Ecell_second_id.at(0) = Ecell.at(0).at(i);
-                Ecell_second_id.at(1) = Ecell.at(1).at(i);
+                Ecell_second_id.at(0) = CellID.at(i);
+                Ecell_second_id.at(1) = Hit_Energy.at(i);
             }
         return Ecell_second_id;
-    }, {"Ecell", "nhits", "Ecell_max"})
+    }, {"CellID", "Hit_Energy", "nhits", "Ecell_max"})
     .Define("Ecell_second", "Ecell_second_id[1]")
     .Define("Emax_sec_diff", "Ecell_max - Ecell_second")
     // Distance between the cell with Ecell_max and the one with Ecell_second
@@ -220,8 +185,8 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         Double_t Emax_sec_dist;
         Double_t x_max = ((Int_t) Ecell_max_id.at(0) % 10000) / 100 * CellWidthX;
         Double_t y_max = (Int_t) Ecell_max_id.at(0) % 100 * CellWidthY;
-        Int_t z_max_temp = (Int_t) Ecell_max_id.at(0) / 10000;
-        Double_t z_max = z_max_temp * Thick;
+        const Int_t z_max_temp = (Int_t) Ecell_max_id.at(0) / 10000;
+        const Double_t z_max = z_max_temp * Thick;
         if (z_max_temp % 2 == 0)
         {
             x_max += 0.5 * CellWidthX;
@@ -229,8 +194,8 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         }
         Double_t x_second = ((Int_t) Ecell_second_id.at(0) % 10000) / 100 * CellWidthX;
         Double_t y_second = (Int_t) Ecell_second_id.at(0) % 100 * CellWidthY;
-        Int_t z_second_temp = (Int_t) Ecell_second_id.at(0) / 10000;
-        Double_t z_second = z_second_temp * Thick;
+        const Int_t z_second_temp = (Int_t) Ecell_second_id.at(0) / 10000;
+        const Double_t z_second = z_second_temp * Thick;
         if (z_second_temp % 2 == 0)
         {
             x_second += 0.5 * CellWidthX;
@@ -239,121 +204,136 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         Emax_sec_dist = Sqrt(Power(x_max - x_second, 2) + Power(y_max - y_second, 2) + Power(z_max - z_second, 2));
         return Emax_sec_dist;
     }, {"Ecell_max_id", "Ecell_second_id"})
-    // The energy deposition in the 3*3 cells around the one with maximum energy deposition
-    .Define("Ecell_max_9", [] (const vector<vector<Double_t>>& Ecell, const vector<Double_t>& Ecell_max_id)->Double_t
+    // The energy deposition in the 3*3*3 cells around the one with maximum energy deposition
+    .Define("Ecell_max_3", [] (const vector<Int_t>& CellID, const vector<Double_t>& Hit_Energy, const vector<Double_t>& Ecell_max_id)->Double_t
     {
-        Double_t Ecell_max_9 = 0.0;
-        Int_t z = (Int_t) Ecell_max_id.at(0) / 10000;
-        Int_t x = ((Int_t) Ecell_max_id.at(0) % 10000) / 100;
-        Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
-        for (Int_t ix = x - 1; ix <= x + 1; ++ix)
+        Double_t Ecell_max_3 = 0.0;
+        const Int_t z = (Int_t) Ecell_max_id.at(0) / 10000;
+        const Int_t x = ((Int_t) Ecell_max_id.at(0) % 10000) / 100;
+        const Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
+        for (Int_t iz = z - 1; iz <= z + 1; ++iz)
         {
-            if (ix < 0 || ix >= nCellsX)
+            if (iz < 0 || iz >= nLayer)
                 continue;
-            for (Int_t iy = y - 1; iy <= y + 1; ++iy)
+            for (Int_t ix = x - 1; ix <= x + 1; ++ix)
             {
-                if (iy < 0 || iy >= nCellsY)
+                if (ix < 0 || ix >= nCellsX)
                     continue;
-                Int_t tmp = z * 10000 + ix * 100 + iy;
-                auto itr = find(Ecell.at(0).begin(), Ecell.at(0).end(), tmp);
-                Int_t index = distance(Ecell.at(0).begin(), itr);
-                if (index >= Ecell.at(0).size())
-                    continue;
-                Ecell_max_9 += Ecell.at(1).at(index);
+                for (Int_t iy = y - 1; iy <= y + 1; ++iy)
+                {
+                    if (iy < 0 || iy >= nCellsY)
+                        continue;
+                    const Int_t tmp = iz * 10000 + ix * 100 + iy;
+                    auto itr = find(CellID.begin(), CellID.end(), tmp);
+                    const Int_t index = distance(CellID.begin(), itr);
+                    if (index >= CellID.size())
+                        continue;
+                    Ecell_max_3 += Hit_Energy.at(index);
+                }
             }
         }
-        return Ecell_max_9;
-    }, {"Ecell", "Ecell_max_id"})
-    // The energy deposition in the 5*5 cells around the one with maximum energy deposition
-    .Define("Ecell_max_25", [] (const vector<vector<Double_t>>& Ecell, const vector<Double_t>& Ecell_max_id)->Double_t
+        return Ecell_max_3;
+    }, {"CellID", "Hit_Energy", "Ecell_max_id"})
+    // The energy deposition in the 5*5*5 cells around the one with maximum energy deposition
+    .Define("Ecell_max_5", [] (const vector<Int_t>& CellID, const vector<Double_t>& Hit_Energy, const vector<Double_t>& Ecell_max_id)->Double_t
     {
-        Double_t Ecell_max_25 = 0.0;
-        Int_t z = (Int_t) Ecell_max_id.at(0) / 10000;
-        Int_t x = ((Int_t) Ecell_max_id.at(0) % 10000) / 100;
-        Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
-        for (Int_t ix = x - 2; ix <= x + 2; ++ix)
+        Double_t Ecell_max_5 = 0.0;
+        const Int_t z = (Int_t) Ecell_max_id.at(0) / 10000;
+        const Int_t x = ((Int_t) Ecell_max_id.at(0) % 10000) / 100;
+        const Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
+        for (Int_t iz = z - 2; iz <= z + 2; ++iz)
         {
-            if (ix < 0 || ix >= nCellsX)
+            if (iz < 0 || iz >= nLayer)
                 continue;
-            for (Int_t iy = y - 2; iy <= y + 2; ++iy)
+            for (Int_t ix = x - 2; ix <= x + 2; ++ix)
             {
-                if (iy < 0 || iy >= nCellsY)
+                if (ix < 0 || ix >= nCellsX)
                     continue;
-                Int_t tmp = z * 10000 + ix * 100 + iy;
-                auto itr = find(Ecell.at(0).begin(), Ecell.at(0).end(), tmp);
-                Int_t index = distance(Ecell.at(0).begin(), itr);
-                if (index >= Ecell.at(0).size())
-                    continue;
-                Ecell_max_25 += Ecell.at(1).at(index);
+                for (Int_t iy = y - 2; iy <= y + 2; ++iy)
+                {
+                    if (iy < 0 || iy >= nCellsY)
+                        continue;
+                    const Int_t tmp = iz * 10000 + ix * 100 + iy;
+                    auto itr = find(CellID.begin(), CellID.end(), tmp);
+                    const Int_t index = distance(CellID.begin(), itr);
+                    if (index >= CellID.size())
+                        continue;
+                    Ecell_max_5 += Hit_Energy.at(index);
+                }
             }
         }
-        return Ecell_max_25;
-    }, {"Ecell", "Ecell_max_id"})
-    // The energy deposition in the 7*7 cells around the one with maximum energy deposition
-    .Define("Ecell_max_49", [] (const vector<vector<Double_t>>& Ecell, const vector<Double_t>& Ecell_max_id)->Double_t
+        return Ecell_max_5;
+    }, {"CellID", "Hit_Energy", "Ecell_max_id"})
+    // The energy deposition in the 7*7*7 cells around the one with maximum energy deposition
+    .Define("Ecell_max_7", [] (const vector<Int_t>& CellID, const vector<Double_t>& Hit_Energy, const vector<Double_t>& Ecell_max_id)->Double_t
     {
-        Double_t Ecell_max_49 = 0.0;
-        Int_t z = (Int_t) Ecell_max_id.at(0) / 10000;
-        Int_t x = ((Int_t) Ecell_max_id.at(0) % 10000) / 100;
-        Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
-        for (Int_t ix = x - 3; ix <= x + 3; ++ix)
+        Double_t Ecell_max_7 = 0.0;
+        const Int_t z = (Int_t) Ecell_max_id.at(0) / 10000;
+        const Int_t x = ((Int_t) Ecell_max_id.at(0) % 10000) / 100;
+        const Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
+        for (Int_t iz = z - 3; iz <= z + 3; ++iz)
         {
-            if (ix < 0 || ix >= nCellsX)
+            if (iz < 0 || iz >= nLayer)
                 continue;
-            for (Int_t iy = y - 3; iy <= y + 3; ++iy)
+            for (Int_t ix = x - 3; ix <= x + 3; ++ix)
             {
-                if (iy < 0 || iy >= nCellsY)
+                if (ix < 0 || ix >= nCellsX)
                     continue;
-                Int_t tmp = z * 10000 + ix * 100 + iy;
-                auto itr = find(Ecell.at(0).begin(), Ecell.at(0).end(), tmp);
-                Int_t index = distance(Ecell.at(0).begin(), itr);
-                if (index >= Ecell.at(0).size())
-                    continue;
-                Ecell_max_49 += Ecell.at(1).at(index);
+                for (Int_t iy = y - 3; iy <= y + 3; ++iy)
+                {
+                    if (iy < 0 || iy >= nCellsY)
+                        continue;
+                    const Int_t tmp = iz * 10000 + ix * 100 + iy;
+                    auto itr = find(CellID.begin(), CellID.end(), tmp);
+                    const Int_t index = distance(CellID.begin(), itr);
+                    if (index >= CellID.size())
+                        continue;
+                    Ecell_max_7 += Hit_Energy.at(index);
+                }
             }
         }
-        return Ecell_max_49;
-    }, {"Ecell", "Ecell_max_id"})
-    // Energy deposition of the central cell divided by the total energy deposition in the 3*3 cells around it
-    .Define("E1E9", [] (const Double_t& Ecell_max, const Double_t& Ecell_max_9, const Int_t& nhits)->Double_t
+        return Ecell_max_7;
+    }, {"CellID", "Hit_Energy", "Ecell_max_id"})
+    // Energy deposition of the central cell divided by the total energy deposition in the 3*3*3 cells around it
+    .Define("E1E3", [] (const Double_t& Ecell_max, const Double_t& Ecell_max_3, const Int_t& nhits)->Double_t
     {
         if (nhits == 0)
             return 0.0;
         else
-            return Ecell_max / Ecell_max_9;
-    }, {"Ecell_max", "Ecell_max_9", "nhits"})
-    // Energy deposition of the central cell divided by the total energy deposition in the 5*5 cells around it
-    .Define("E1E25", [] (const Double_t& Ecell_max, const Double_t& Ecell_max_25, const Int_t& nhits)->Double_t
+            return Ecell_max / Ecell_max_3;
+    }, {"Ecell_max", "Ecell_max_3", "nhits"})
+    // Energy deposition of the central cell divided by the total energy deposition in the 5*5*5 cells around it
+    .Define("E1E5", [] (const Double_t& Ecell_max, const Double_t& Ecell_max_5, const Int_t& nhits)->Double_t
     {
         if (nhits == 0)
             return 0.0;
         else
-            return Ecell_max / Ecell_max_25;
-    }, {"Ecell_max", "Ecell_max_25", "nhits"})
-    // Energy deposition of the central cell divided by the total energy deposition in the 7*7 cells around it
-    .Define("E1E49", [] (const Double_t& Ecell_max, const Double_t& Ecell_max_49, const Int_t& nhits)->Double_t
+            return Ecell_max / Ecell_max_5;
+    }, {"Ecell_max", "Ecell_max_5", "nhits"})
+    // Energy deposition of the central cell divided by the total energy deposition in the 7*7*7 cells around it
+    .Define("E1E7", [] (const Double_t& Ecell_max, const Double_t& Ecell_max_7, const Int_t& nhits)->Double_t
     {
         if (nhits == 0)
             return 0.0;
         else
-            return Ecell_max / Ecell_max_49;
-    }, {"Ecell_max", "Ecell_max_49", "nhits"})
-    // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 5*5 cells around it
-    .Define("E9E25", [] (const Double_t& Ecell_max_9, const Double_t& Ecell_max_25, const Int_t& nhits)->Double_t
+            return Ecell_max / Ecell_max_7;
+    }, {"Ecell_max", "Ecell_max_7", "nhits"})
+    // Energy deposition of the central 3*3*3 cells divided by the total energy deposition in the 5*5*5 cells around it
+    .Define("E3E5", [] (const Double_t& Ecell_max_3, const Double_t& Ecell_max_5, const Int_t& nhits)->Double_t
     {
         if (nhits == 0)
             return 0.0;
         else
-            return Ecell_max_9 / Ecell_max_25;
-    }, {"Ecell_max_9", "Ecell_max_25", "nhits"})
-    // Energy deposition of the central 3*3 cells divided by the total energy deposition in the 7*7 cells around it
-    .Define("E9E49", [] (const Double_t& Ecell_max_9, const Double_t& Ecell_max_49, const Int_t& nhits)->Double_t
+            return Ecell_max_3 / Ecell_max_5;
+    }, {"Ecell_max_3", "Ecell_max_5", "nhits"})
+    // Energy deposition of the central 3*3*3 cells divided by the total energy deposition in the 7*7*7 cells around it
+    .Define("E3E7", [] (const Double_t& Ecell_max_3, const Double_t& Ecell_max_7, const Int_t& nhits)->Double_t
     {
         if (nhits == 0)
             return 0.0;
         else
-            return Ecell_max_9 / Ecell_max_49;
-    }, {"Ecell_max_9", "Ecell_max_49", "nhits"})
+            return Ecell_max_3 / Ecell_max_7;
+    }, {"Ecell_max_3", "Ecell_max_7", "nhits"})
     // Energy deposition of the cell with largest energy deposition, divided by total energy deposition
     .Define("E1Edep", [] (const Double_t& Ecell_max, const Double_t& Edep, const Int_t& nhits)->Double_t
     {
@@ -362,30 +342,30 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         else
             return Ecell_max / Edep;
     }, {"Ecell_max", "Edep", "nhits"})
-    // Energy deposition of the central 3*3 cells divided by the total energy deposition
-    .Define("E9Edep", [] (const Double_t& Ecell_max_9, const Double_t& Edep, const Int_t& nhits)->Double_t
+    // Energy deposition of the central 3*3*3 cells divided by the total energy deposition
+    .Define("E3Edep", [] (const Double_t& Ecell_max_3, const Double_t& Edep, const Int_t& nhits)->Double_t
     {
         if (nhits == 0)
             return 0.0;
         else
-            return Ecell_max_9 / Edep;
-    }, {"Ecell_max_9", "Edep", "nhits"})
-    // Energy deposition of the central 5*5 cells divided by the total energy deposition
-    .Define("E25Edep", [] (const Double_t& Ecell_max_25, const Double_t& Edep, const Int_t& nhits)->Double_t
+            return Ecell_max_3 / Edep;
+    }, {"Ecell_max_3", "Edep", "nhits"})
+    // Energy deposition of the central 5*5*5 cells divided by the total energy deposition
+    .Define("E5Edep", [] (const Double_t& Ecell_max_5, const Double_t& Edep, const Int_t& nhits)->Double_t
     {
         if (nhits == 0)
             return 0.0;
         else
-            return Ecell_max_25 / Edep;
-    }, {"Ecell_max_25", "Edep", "nhits"})
-    // Energy deposition of the central 7*7 cells divided by the total energy deposition
-    .Define("E49Edep", [] (const Double_t& Ecell_max_49, const Double_t& Edep, const Int_t& nhits)->Double_t
+            return Ecell_max_5 / Edep;
+    }, {"Ecell_max_5", "Edep", "nhits"})
+    // Energy deposition of the central 7*7*7 cells divided by the total energy deposition
+    .Define("E7Edep", [] (const Double_t& Ecell_max_7, const Double_t& Edep, const Int_t& nhits)->Double_t
     {
         if (nhits == 0)
             return 0.0;
         else
-            return Ecell_max_49 / Edep;
-    }, {"Ecell_max_49", "Edep", "nhits"})
+            return Ecell_max_7 / Edep;
+    }, {"Ecell_max_7", "Edep", "nhits"})
     // RMS value of the positions of all the hits on a layer
     .Define("layer_rms", [] (const vector<Double_t>& Hit_X, const vector<Double_t>& Hit_Y, const vector<Int_t>& layer, const vector<Double_t>& Hit_Energy, const Int_t& nhits, const Double_t& COG_X_mean, const Double_t& COG_Y_mean)->vector<Double_t>
     {
@@ -410,7 +390,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         vector<TH2D*>().swap(hvec);
         return layer_rms;
     }, {"Hit_X", "Hit_Y", "layer", "Hit_Energy", "nhits", "COG_X_mean", "COG_Y_mean"})
-    // The layer where the shower begins; otherwise it is set to be nLayer + 2
+    // The layer where the shower begins; otherwise it is set to be -1
     .Define("shower_start", [] (const vector<Int_t>& hits_on_layer)->Int_t
     {
         Int_t shower_start = -1;
@@ -438,22 +418,14 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
             }
         return shower_end;
     }, {"hits_on_layer", "shower_start"})
-    // Shower radius with respect to COGX and COGY (between beginning and ending layers)
-    .Define("shower_radius", [] (const vector<Double_t>& Hit_X, const vector<Double_t>& Hit_Y, const vector<Int_t>& layer, const Int_t& shower_start, const Int_t& shower_end, const Int_t& nhits, const Double_t& COG_X_mean, const Double_t& COG_Y_mean)->Double_t
+    // Shower radius with respect to the event axis, which was obtained from 3-dimensional fitting of all the hits
+    .Define("shower_radius", [] (const vector<Double_t>& Hit_X, const vector<Double_t>& Hit_Y, const vector<Double_t>& Hit_Z, const Int_t& nhits)->Double_t
     {
-        Double_t d2 = 0;
-        Int_t hits = 0;
-        for (Int_t i = 0; i < nhits; ++i)
-            if (layer.at(i) >= shower_start - 1 && layer.at(i) < shower_end - 1)
-            {
-                ++hits;
-                d2 += Power(Hit_X.at(i) - COG_X_mean, 2) + Power(Hit_Y.at(i) - COG_Y_mean, 2);
-            }
-        if (hits == 0)
-            return 0.0;
-        Double_t radius = Sqrt(d2 / hits);
+        auto* fit = new Fit3D(Hit_X, Hit_Y, Hit_Z, nhits);
+        const Double_t radius = fit->GetRMSRadius();
+        delete fit;
         return radius;
-    }, {"Hit_X", "Hit_Y", "layer", "shower_start", "shower_end", "nhits", "COG_X_mean", "COG_Y_mean"})
+    }, {"Hit_X", "Hit_Y", "Hit_Z", "nhits"})
     // RMS value of the shower in x direction
     .Define("layer_xwidth", [] (const vector<Double_t>& Hit_X, const vector<Int_t>& layer, const Int_t& nhits, const Double_t& COG_X_mean)->vector<Double_t>
     {
@@ -464,7 +436,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
             h.emplace_back(new TH1D(TString("h") + TString(to_string(l)), "test", 120, -30, 30));
         for (Int_t i = 0; i < nhits; ++i)
         {
-            Int_t ilayer = layer.at(i);
+            const Int_t ilayer = layer.at(i);
             h.at(ilayer)->Fill(Hit_X.at(i) - COG_X_mean);
         }
         for (Int_t i = 0; i < h.size(); ++i)
@@ -485,7 +457,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
             h.emplace_back(new TH1D(TString("h") + TString(to_string(l)), "test", 120, -30, 30));
         for (Int_t i = 0; i < nhits; ++i)
         {
-            Int_t ilayer = layer.at(i);
+            const Int_t ilayer = layer.at(i);
             h.at(ilayer)->Fill(Hit_Y.at(i) - COG_Y_mean);
         }
         for (Int_t i = 0; i < h.size(); ++i)
@@ -525,7 +497,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         else
             return (Double_t) shower_layer / (Double_t) hit_layer;
     }, {"shower_layer", "hit_layer", "nhits"})
-    // Average number of hits in the 3*3 cells around a given one
+    // Average number of hits in the 3*3*3 cells around a given one
     .Define("shower_density", [] (const vector<Int_t>& CellID, const Int_t& nhits)->Double_t
     {
         Double_t shower_density = 0.0;
@@ -539,19 +511,24 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         }
         for (Int_t j = 0; j < nhits; ++j)
         {
-            Int_t x = (CellID.at(j) % 10000) / 100;
-            Int_t y = CellID.at(j) % 100;
-            Int_t z = CellID.at(j) / 10000;
-            for (Int_t ix = x - 1; ix <= x + 1; ++ix)
+            const Int_t x = (CellID.at(j) % 10000) / 100;
+            const Int_t y = CellID.at(j) % 100;
+            const Int_t z = CellID.at(j) / 10000;
+            for (Int_t iz = z - 1; iz <= z + 1; ++iz)
             {
-                if (ix < 0 || ix > nCellsX - 1)
+                if (iz < 0 || iz >= nLayer)
                     continue;
-                for (Int_t iy = y - 1; iy <= y + 1; ++iy)
+                for (Int_t ix = x - 1; ix <= x + 1; ++ix)
                 {
-                    if (iy < 0 || iy > nCellsY - 1)
+                    if (ix < 0 || ix >= nCellsX)
                         continue;
-                    Int_t tmp = z * 10000 + ix * 100 + iy;
-                    shower_density += map_CellID[tmp];
+                    for (Int_t iy = y - 1; iy <= y + 1; ++iy)
+                    {
+                        if (iy < 0 || iy >= nCellsY)
+                            continue;
+                        const Int_t tmp = z * 10000 + ix * 100 + iy;
+                        shower_density += map_CellID[tmp];
+                    }
                 }
             }
         }
@@ -581,38 +558,38 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
     // 2-dimensional fractal dimension
     .Define("FD_2D", [] (const vector<Double_t>& Hit_X, const vector<Double_t>& Hit_Y, const vector<Double_t>& Hit_Z, const Int_t& nhits)->vector<Double_t>
     {
-        vector<Int_t> scale = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150 };
+        vector<Int_t> scale = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
         const Int_t num = scale.size();
         vector<Double_t> fd_2d(num);
-        vector<Int_t> NResizeHit(num);
+        vector<Int_t> nhits_new(num);
         for (Int_t i = 0; i < num; ++i)
         {
-            NResizeHit.at(i) = NewScale(Hit_X, Hit_Y, Hit_Z, scale.at(i), scale.at(i), 1);
-            if (nhits == 0 || NResizeHit.at(i) <= 0)
+            nhits_new.at(i) = NewScale(Hit_X, Hit_Y, Hit_Z, scale.at(i), scale.at(i), 1);
+            if (nhits == 0 || nhits_new.at(i) <= 0)
             {
                 fd_2d.at(i) = -1.0;
                 continue;
             }
-            fd_2d.at(i) = Log((Double_t) nhits / NResizeHit.at(i)) / Log((Double_t) scale.at(i));
+            fd_2d.at(i) = Log((Double_t) nhits / nhits_new.at(i)) / Log(scale.at(i));
         }
         return fd_2d;
     }, {"Hit_X", "Hit_Y", "Hit_Z", "nhits"})
     // 3-dimensional fractal dimension
     .Define("FD_3D", [] (const vector<Double_t>& Hit_X, const vector<Double_t>& Hit_Y, const vector<Double_t>& Hit_Z, const Int_t& nhits)->vector<Double_t>
     {
-        vector<Int_t> scale = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150 };
+        vector<Int_t> scale = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
         const Int_t num = scale.size();
         vector<Double_t> fd_3d(num);
-        vector<Int_t> NResizeHit(num);
+        vector<Int_t> nhits_new(num);
         for (Int_t i = 0; i < num; ++i)
         {
-            NResizeHit.at(i) = NewScale(Hit_X, Hit_Y, Hit_Z, scale.at(i), scale.at(i), scale.at(i));
-            if (nhits == 0 || NResizeHit.at(i) <= 0)
+            nhits_new.at(i) = NewScale(Hit_X, Hit_Y, Hit_Z, scale.at(i), scale.at(i), scale.at(i));
+            if (nhits == 0 || nhits_new.at(i) <= 0)
             {
                 fd_3d.at(i) = -1.0;
                 continue;
             }
-            fd_3d.at(i) = Log((Double_t) nhits / NResizeHit.at(i)) / Log((Double_t) scale.at(i));
+            fd_3d.at(i) = Log((Double_t) nhits / nhits_new.at(i)) / Log(scale.at(i));
         }
         return fd_3d;
     }, {"Hit_X", "Hit_Y", "Hit_Z", "nhits"})
@@ -623,7 +600,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         Double_t total = 0;
         for (Int_t i = 0; i < num; ++i)
             total += FD_2D.at(i);
-        Double_t FD_2D_mean = total / num;
+        const Double_t FD_2D_mean = total / num;
         return FD_2D_mean;
     }, {"FD_2D"})
     // Average value of all the 3-dimensional fractal dimensions
@@ -633,7 +610,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         Double_t total = 0;
         for (Int_t i = 0; i < num; ++i)
             total += FD_3D.at(i);
-        Double_t FD_3D_mean = total / num;
+        const Double_t FD_3D_mean = total / num;
         return FD_3D_mean;
     }, {"FD_3D"})
     // RMS value of all the 2-dimensional fractal dimensions
@@ -643,7 +620,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         Double_t total2 = 0;
         for (Int_t i = 0; i < num; ++i)
             total2 += Power(FD_2D.at(i), 2);
-        Double_t FD_2D_rms = Sqrt(total2 / num);
+        const Double_t FD_2D_rms = Sqrt(total2 / num);
         return FD_2D_rms;
     }, {"FD_2D"})
     // RMS value of all the 3-dimensional fractal dimensions
@@ -653,7 +630,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         Double_t total2 = 0;
         for (Int_t i = 0; i < num; ++i)
             total2 += Power(FD_3D.at(i), 2);
-        Double_t FD_3D_rms = Sqrt(total2 / num);
+        const Double_t FD_3D_rms = Sqrt(total2 / num);
         return FD_3D_rms;
     }, {"FD_3D"})
     .Snapshot(tree, outname);
@@ -662,7 +639,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", true);
-    const vector<TString> deactivate = { "CellID", "Ecell", "Ecell_max_id", "Ecell_second_id", "FD_2D", "FD_3D", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
+    const vector<TString> deactivate = { "CellID", "Ecell_max_id", "Ecell_second_id", "FD_2D", "FD_3D", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
     for (const TString& de : deactivate)
         t->SetBranchStatus(de, false);
     TFile* fnew = new TFile((TString) outname, "RECREATE");
