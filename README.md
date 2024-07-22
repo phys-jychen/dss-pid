@@ -29,7 +29,7 @@ After generating MC samples with `DSimu` in the DarkSHINE simulation framework, 
 ### Selecting Hits
 The desired hit information are in the form of `Hit_X`, `Hit_Y`, etc., which should be converted from `ECAL_ECell_XYZ`. To achieve this, run
 ```shell
-iPID -s -f [file]
+iPID -s -f [file]    # 's' stands for 'select'
 ```
 if the tree in the original ROOT file has default name `dp`. Otherwise, to specify other tree names, run
 ```shell
@@ -40,7 +40,7 @@ After this, an output file whose name has a prefix ‘sel’ is created in your 
 
 Next, it is time to store explicit hit information:
 ```shell
-iPID -h -f [file]
+iPID -h -f [file]    # 'h' stands for 'hit'
 # Or
 iPID -h -f [file] -t [tree]
 ```
@@ -50,7 +50,7 @@ Then, an output file whose name has a prefix ‘hit’ is created in your curren
 ### Adding Reconstructed Variables
 In any directory, execute:
 ```shell
-iPID -r -f [file]
+iPID -r -f [file]    # 'r' stands for 'reconstruct'
 # Or
 iPID -r -f [file] -t [tree]
 ```
@@ -60,21 +60,31 @@ The name of the output file is given a prefix ‘rec’ in your current director
 ### Performing BDT
 Before you begin, make sure that the variables as well as the ROOT files listed in `bdt.cxx` are all present (you can also modify this file to meet your own needs). Then, execute:
 ```shell
-iPID -b
+iPID -b    # 'b' stands for 'BDT'
 # Or
 iPID -b -t [tree]
 ```
 
 Eventually, you can see the output file containing the data obtained during training and test (`TMVAMulticlass.root`) in your current directory.
 
-Possibly you need to know the performance of BDT on the validation dataset. In this case, execute:
+Possibly you need to know the performance of BDT on the validation dataset or apply it to other scenarios. In either case, execute:
 ```shell
-iPID -c -f [file]
+iPID -c -f [file]    # 'c' stands for 'classify'
 # Or
 iPID -c -f [file] -t [tree]
 ```
 
 Then, the BDT response is stored in the output ROOT file, whose name has a prefix ‘bdt’, in your current directory. While modifying `src/BDT.cxx`, make sure that the input variables are identical to those in `bdt.cxx`, including the order!
+
+### Printing to CSV
+After the file `TMVAMulticlass.root` is created, you can plot the ROC (receiver operating characteristic) curves to understand the performance of BDT better. To do so, you have to dump the true positive (TP) values, true negative (TN) values, etc. to make the plot. Execute:
+```shell
+iPID -p -f [TMVA output file]    # 'p' stands for 'print'
+```
+
+Then, the CSV file containing TP and TN values will be created in your current directory.
+
+Notice: this process might be time-consuming. If you are working on the cluster of INPAC, IHEP, etc., you might need to submit it as a job.
 
 ### Event Display and Energy Projection
 In the directory you have installed, run
@@ -83,7 +93,7 @@ In the directory you have installed, run
 ```
 to obtain a figure of event display or two figures of energy projection (on three axes and three primary projection planes), which will be saved in a directory assigned in this shell script.
 
-You can modify this shell script to meet your own needs: display type (event display or energy projection), input ROOT file, tree name, title of the figure, ID of the event, directory to save the output file, name of the output file, and instantly show the figure or not.
+You can modify this shell script to meet your own needs: display mode (event display or energy projection), input ROOT file, tree name, title of the figure, ID of the run and the event, directory to save the output file, name of the output file and instantly show the figure or not.
 
 ## Environment Set-up
 This project requires CMake version >= 3.17. If you are working on the cluster of INPAC, IHEP, etc., the environment can be easily set up by simply executing
@@ -92,7 +102,7 @@ source /cvmfs/sft.cern.ch/lcg/views/LCG_102/x86_64-centos7-gcc11-opt/setup.sh
 ```
 (This command has been included in `setup.sh`.)
 
-Then, the environment with CMake 3.20.0 and ROOT 6.26/04 is configured. As long as neither compilation errors are raised, nor the CMake version requirement is met, other versions on the LCG are also acceptable. :stuck_out_tongue:
+Then, the environment with CMake 3.20.0 and ROOT 6.26/04 is configured. As long as the CMake version requirement is met and no compilation errors are raised, other versions on the LCG can also be used. :stuck_out_tongue:
 
 ### Notice
 On WSL2, the above environment cannot be used for event display, since error occurs with X11! Instead, the environment used while designing this program was with

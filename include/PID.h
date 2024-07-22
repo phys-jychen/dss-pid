@@ -15,7 +15,9 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TMath.h"
+#include "TH1D.h"
 #include "TH2D.h"
+#include "TDirectoryFile.h"
 #include "TStyle.h"
 #include "TSystem.h"
 #include <ROOT/RDataFrame.hxx>
@@ -36,6 +38,7 @@ using std::pair;
 using std::to_string;
 using std::cout;
 using std::endl;
+using std::ofstream;
 
 using namespace ROOT;
 using namespace TMath;
@@ -105,7 +108,9 @@ public:
 
     Int_t TrainBDT();
 
-    static Int_t BDTNtuple(const string& fname, const string& tname);
+    static Int_t BDTNtuple(const string& file, const string& tree);
+
+    static Int_t PrintCSV(const string& file);
 
     void Clear()
     {

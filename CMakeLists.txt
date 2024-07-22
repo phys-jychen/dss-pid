@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.16)
 #set(CMAKE_CXX_STANDARD 17)
 
 # Name and version of the project
-project(dss_pid VERSION 1.1.0 LANGUAGES C CXX)
+project(dss_pid VERSION 1.2.0 LANGUAGES C CXX)
 
 # Type of CMake
 set(CMAKE_BUILD_TYPE Debug)
@@ -27,6 +27,7 @@ include(${ROOT_USE_FILE})
 add_executable(iPID pid.cxx src/BDT.cxx
                             src/Fit3D.cxx
                             src/Hits.cxx
+                            src/PrintCSV.cxx
                             src/Variables.cxx
 )
 

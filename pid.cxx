@@ -6,6 +6,7 @@ Int_t main(Int_t argc, Char_t* argv[])
     Int_t sel = 0, hit = 0;
     Int_t rec = 0;
     Int_t bdt = 0, classify = 0;
+    Int_t print = 0;
     Int_t help = 0;
 
     for (Int_t i = 1; i < argc; i++)
@@ -32,6 +33,7 @@ Int_t main(Int_t argc, Char_t* argv[])
             cout << " Classification:" << endl;
             cout << "     With default tree \'dp\':     iPID -c -f [file]" << endl;
             cout << "     With other specified tree:  iPID -c -f [file] -t [tree]" << endl;
+            cout << " Dumping TP and TN values:       iPID -p [TMVA output file]" << endl;
             cout << "****************************************************************" << endl << endl;
             break;
         }
@@ -56,6 +58,9 @@ Int_t main(Int_t argc, Char_t* argv[])
 
         else if (string(argv[i]) == string("-c"))
             classify = 1;
+
+        else if (string(argv[i]) == string("-p"))
+            print = 1;
     }
 
     PID* p = new PID();
@@ -70,6 +75,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
         cout << "--> Branch selection finished!" << endl;
     }
+
     else if (hit == 1 && !file.empty())
     {
         cout << "--> Collecting original hits..." << endl;
@@ -80,6 +86,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
         cout << "--> Hit collection finished!" << endl;
     }
+
     else if (rec == 1 && !file.empty())
     {
         cout << "---> Reconstructing variables..." << endl;
@@ -90,6 +97,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
         cout << "---> Variable reconstruction finished!" << endl;
     }
+
     else if (bdt == 1)
     {
         cout << "----> Training and testing..." << endl;
@@ -170,6 +178,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 
         cout << "----> Training and testing finished!" << endl;
 	}
+
     else if (classify == 1 && !file.empty())
     {
         cout << "----> Classifying..." << endl;
@@ -180,6 +189,17 @@ Int_t main(Int_t argc, Char_t* argv[])
 
         cout << "----> Classification finished!" << endl;
     }
+
+    else if (print == 1 && !file.empty())
+    {
+        cout << "-----> Printing to CSV..." << endl;
+        cout << "-----> File: " << file << endl;
+
+        PID::PrintCSV(file);
+
+        cout << "-----> Printing to CSV finished!" << endl;
+    }
+
     else if (help == 0)
     {
         cout << "Invalid input." << endl;

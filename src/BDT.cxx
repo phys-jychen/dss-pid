@@ -99,10 +99,10 @@ Int_t PID::TrainBDT()
     return 0;	
 }
 
-Int_t PID::BDTNtuple(const string& fname, const string& tname)
+Int_t PID::BDTNtuple(const string& file, const string& tree)
 {
     EnableImplicitMT();
-    string outname = fname;
+    string outname = file;
     outname = outname.substr(outname.find_last_of('/') + 1);
     outname = "bdt_" + outname;
 
@@ -260,7 +260,7 @@ Int_t PID::BDTNtuple(const string& fname, const string& tname)
     rdf_input.emplace_back("ywidth");
     rdf_input.emplace_back("zdepth");
 
-    RDataFrame df(tname, fname);
+    RDataFrame df(tree, file);
     auto bdtout = df.Define("Signal_Likelihood", [&]
         (Double_t COG_X_mean,
          Double_t COG_Y_mean,
@@ -348,6 +348,6 @@ Int_t PID::BDTNtuple(const string& fname, const string& tname)
         bdt_zdepth             = zdepth;
         return (reader->EvaluateMulticlass( "BDTG method" ))[0];
     }, rdf_input)
-    .Snapshot(tname, outname);
+    .Snapshot(tree, outname);
     return 0;
 }

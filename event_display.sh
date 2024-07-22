@@ -58,5 +58,5 @@ then
     title+="PN Target"
 fi
 
-#python ${mode}.py -f=${filename} -i="${title}" -e=${event_index} -d=${save_dir} -o=${output} -s=${show}
+#python ${mode}.py -f=${filename} -i="${title}" -r=${run_index} -e=${event_index} -d=${save_dir} -o=${output} -s=${show}
 python ${mode}.py -f=${filename} -i="${title}" -r=${run_index} -e=${event_index} -d=${save_dir} -o=${output}
