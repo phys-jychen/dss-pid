@@ -10,7 +10,7 @@ Int_t PID::SaveBranches(const string& file, const string& tree)
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", false);
 
-    const vector<TString> remains = { "EventNumber", "ECAL_ClusterSub_E", "ECAL_ClusterSub_matchRecTrk", "ECAL_ClusterSub_N", "ECAL_ClusterSub_X", "ECAL_ClusterSub_Y", "ECAL_ClusterSub_Z", "ECAL_Cluster_E", "ECAL_Cluster_N", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z", "ECAL_ECell_XYZ", "RunNumber" };
+    const vector<TString> remains = { "EventNumber", "ECAL_ClusterSub_E", "ECAL_ClusterSub_matchRecTrk", "ECAL_ClusterSub_N", "ECAL_ClusterSub_X", "ECAL_ClusterSub_Y", "ECAL_ClusterSub_Z", "ECAL_Cluster_E", "ECAL_Cluster_N", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z", "ECAL_ECell_XYZ", "RecTrk2_track_No", "RunNumber", "TagTrk2_track_No" };
     for (const TString& re : remains)
         t->SetBranchStatus(re, true);
 

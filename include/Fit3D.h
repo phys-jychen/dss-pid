@@ -26,7 +26,7 @@ using namespace TMath;
 class Fit3D
 {
 public:
-    Fit3D(const vector<Double_t>& hit_x, const vector<Double_t>& hit_y, const vector<Double_t>& hit_z, const Int_t& nhits);
+    Fit3D(const vector<Double_t>& hit_x, const vector<Double_t>& hit_y, const vector<Double_t>& hit_z, const vector<Double_t>& hit_energy, const Int_t& nhits);
 
     ~Fit3D() = default;
 

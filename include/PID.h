@@ -98,6 +98,11 @@ public:
         var.insert(pair<TString, Char_t>(TString(v), type));
     }
 
+    void AddSpec(const string& v, const string& title)
+    {
+        spec.insert(pair<TString, TString>(TString(v), TString(title)));
+    }
+
     Int_t TrainBDT();
 
     static Int_t BDTNtuple(const string& fname, const string& tname);
@@ -105,6 +110,7 @@ public:
     void Clear()
     {
         var.clear();
+        spec.clear();
         train_sig.clear();
         train_bkg.clear();
         test_sig.clear();
@@ -116,6 +122,7 @@ private:
     static Int_t NewScale(const vector<Double_t>& pos_x, const vector<Double_t>& pos_y, const vector<Double_t>& pos_z, const Int_t& RatioX, const Int_t& RatioY, const Int_t& RatioZ);
 
     map<TString, Char_t> var;
+    map<TString, TString> spec;
     map<TString, TString> train_sig;
     map<TString, TString> train_bkg;
     map<TString, TString> test_sig;

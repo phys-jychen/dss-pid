@@ -25,9 +25,9 @@ include(${ROOT_USE_FILE})
 
 # Add executables
 add_executable(iPID pid.cxx src/BDT.cxx
+                            src/Fit3D.cxx
                             src/Hits.cxx
                             src/Variables.cxx
-                            src/Fit3D.cpp
 )
 
 # Link libraries

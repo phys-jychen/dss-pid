@@ -21,19 +21,28 @@ def read_file(fname: str, tree: str, event_index: int):
     with up.open(fname) as f:
         tree = f[tree]
 
-        Hit_X = tree['Hit_X'].array(library='np')[event_index]
-        Hit_Y = tree['Hit_Y'].array(library='np')[event_index]
-        Hit_Z = tree['Hit_Z'].array(library='np')[event_index]
-        Hit_Energy = tree['Hit_Energy'].array(library='np')[event_index]
+        EventID = tree['EventNumber'].array(library='np')
 
-        assert len(Hit_X) == len(Hit_Y)
-        assert len(Hit_X) == len(Hit_Z)
-        assert len(Hit_X) == len(Hit_Energy)
+        try:
+            event = np.where(EventID == event_index)[0][0]
+        except:
+            print('Event ID does not exist in the ROOT file!')
+            raise
+
+        print(f'Entry ID: {event}')
+        print(f'Event ID: {event_index}')
+
+        Hit_X = tree['Hit_X'].array(library='np')[event]
+        Hit_Y = tree['Hit_Y'].array(library='np')[event]
+        Hit_Z = tree['Hit_Z'].array(library='np')[event]
+        Hit_Energy = tree['Hit_Energy'].array(library='np')[event]
+
+        assert len(Hit_X) == len(Hit_Y) == len(Hit_Z) == len(Hit_Energy)
 
         return Hit_X, Hit_Y, Hit_Z, Hit_Energy
 
 
-def plot_axis(fname: str, tree: str, event_index: int, title: str, staggered: bool):
+def plot_axis(fname: str, tree: str, run_index: int, event_index: int, title: str, staggered: bool):
     Hit_X, Hit_Y, Hit_Z, Hit_Energy = read_file(fname, tree, event_index)
 
     d_x = dict()
@@ -113,6 +122,10 @@ def plot_axis(fname: str, tree: str, event_index: int, title: str, staggered: bo
     ax_y.set_ylabel("Energy [MeV]", size='large')
 
     fig.suptitle(title, size='xx-large')
+
+    fig.text(0.05, 0.9, f'Run ID: {run_index}\nEvent ID: {event_index}')
+    fig.text(0.75, 0.9, r'$E_\mathrm{total} =$' + f'{np.sum(Hit_Energy):.3f} MeV\n' + r'$E_\mathrm{max} =$' + f'{np.max(Hit_Energy):.3f} MeV')
+
     plt.tight_layout()
 
 
@@ -223,7 +236,6 @@ def plot_plane(fname: str, tree: str, event_index: int, title: str, staggered: b
 
     clb = plt.cm.ScalarMappable(cmap=OrRd)
     clb.set_array(dz_xz)
-    # fig.colorbar(clb, pad=0.2, ax=ax_xz)
 
     ax_xz.xaxis._axinfo['grid'].update(linestyle=':', linewidth=0.5)
     ax_xz.yaxis._axinfo['grid'].update(linestyle=':', linewidth=0.5)
@@ -254,7 +266,6 @@ def plot_plane(fname: str, tree: str, event_index: int, title: str, staggered: b
 
     clb = plt.cm.ScalarMappable(cmap=OrRd)
     clb.set_array(dz_yz)
-    # fig.colorbar(clb, pad=0.2, ax=ax_yz)
 
     ax_yz.xaxis._axinfo['grid'].update(linestyle=':', linewidth=0.5)
     ax_yz.yaxis._axinfo['grid'].update(linestyle=':', linewidth=0.5)
@@ -267,6 +278,10 @@ def plot_plane(fname: str, tree: str, event_index: int, title: str, staggered: b
     ax_yz.view_init(elev=10, azim=-40, roll=0)
 
     fig.suptitle(title, size='xx-large')
+
+    fig.text(0.05, 0.85, f'Run ID: {run_index}\nEvent ID: {event_index}')
+    fig.text(0.75, 0.85, r'$E_\mathrm{total} =$' + f'{np.sum(Hit_Energy):.3f} MeV\n' + r'$E_\mathrm{max} =$' + f'{np.max(Hit_Energy):.3f} MeV')
+
     plt.tight_layout()
 
 
@@ -277,7 +292,8 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--tree",      type=str, default='dp', help="Input tree name (default: dp)")
     parser.add_argument("-g", "--staggered", type=int, default=1,    choices=[0, 1], help="Staggered structure")
     parser.add_argument("-i", "--title",     type=str, default='',   help="Title of display figure")
-    parser.add_argument("-e", "--event",     type=int, default=0,    help="The event to be displayed")
+    parser.add_argument("-r", "--run",       type=int, default=0,    help="Run ID of the event to be displayed")
+    parser.add_argument("-e", "--event",     type=int, default=0,    help="Event ID")
     parser.add_argument("-d", "--dir",       type=str, default=None, help="Directory to save the plot")
     parser.add_argument("-o", "--output",    type=str, default=None, help="Output file name")
     parser.add_argument("-s", "--show",      type=int, default=1,    choices=[0, 1], help="Instantly display or not")
@@ -287,18 +303,17 @@ if __name__ == '__main__':
     tree = args.tree
     staggered = args.staggered
     title = args.title
+    run_index = args.run
     event_index = args.event
     save_dir = args.dir
     output = args.output
     show = args.show
 
-    plot_axis(filename, tree, event_index, title, staggered)
+    plot_axis(filename, tree, run_index, event_index, title, staggered)
 
     if save_dir and output:
         plt.savefig(join(save_dir, "Axis" + output))
         print("Figure ", join(save_dir, "Axis" + output), " successfully created!")
-
-    plt.clf()
 
     plot_plane(filename, tree, event_index, title, staggered)
 

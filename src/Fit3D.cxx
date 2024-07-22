@@ -1,13 +1,17 @@
 #include "Fit3D.h"
 
 vector<TVector3> points;
+vector<Double_t> weights;
 
-Fit3D::Fit3D(const vector<Double_t>& hit_x, const vector<Double_t>& hit_y, const vector<Double_t>& hit_z, const Int_t& nhits)
+Fit3D::Fit3D(const vector<Double_t>& hit_x, const vector<Double_t>& hit_y, const vector<Double_t>& hit_z, const vector<Double_t>& hit_energy, const Int_t& nhits)
 {
     if (nhits >= 3)
     {
         for (Int_t i = 0; i < nhits; ++i)
+        {
             points.emplace_back(hit_x.at(i), hit_y.at(i), hit_z.at(i));
+            weights.emplace_back(hit_energy.at(i));
+        }
 
         Math::Minimizer* minimiser = Math::Factory::CreateMinimizer("Minuit2", "Migrad");
         minimiser->SetMaxFunctionCalls(1000000);
@@ -36,12 +40,14 @@ Fit3D::Fit3D(const vector<Double_t>& hit_x, const vector<Double_t>& hit_y, const
         direction_z = results[5];
 
         Double_t d2total = 0;
-        for (const TVector3& p: points)
+        Double_t weight_sum = 0;
+        for (Int_t i = 0; i < points.size(); ++i)
         {
-            const Double_t d = DistanceToLine(p, linePoint, lineDir);
-            d2total += Power(d, 2);
+            const Double_t d = DistanceToLine(points.at(i), linePoint, lineDir);
+            d2total += hit_energy.at(i) * Power(d, 2);
+            weight_sum += hit_energy.at(i);
         }
-        radius = Sqrt(d2total / nhits);
+        radius = Sqrt(d2total / weight_sum);
 
         delete minimiser;
         points.clear();
@@ -61,10 +67,10 @@ Double_t Fit3D::SumDist2(const Double_t* par)
     lineDir = lineDir.Unit();
 
     Double_t sum = 0;
-    for (const TVector3& p : points)
+    for (Int_t i = 0; i < points.size(); ++i)
     {
-        const Double_t d = DistanceToLine(p, linePoint, lineDir);
-        sum += Power(d, 2);
+        const Double_t d = DistanceToLine(points.at(i), linePoint, lineDir);
+        sum += weights.at(i) * Power(d, 2);
     }
     return sum;
 }

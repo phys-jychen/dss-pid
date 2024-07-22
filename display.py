@@ -17,34 +17,34 @@ def read_file(fname: str, tree: str, event_index: int, staggered: bool):
     with up.open(fname) as f:
         tree = f[tree]
 
-        Hit_X = tree['Hit_X'].array(library='np')
-        Hit_Y = tree['Hit_Y'].array(library='np')
-        Hit_Z = tree['Hit_Z'].array(library='np')
-        Hit_Energy = tree['Hit_Energy'].array(library='np')
+        EventID = tree['EventNumber'].array(library='np')
 
-        xtemp = Hit_X[event_index]
-        ytemp = Hit_Y[event_index]
+        try:
+            event = np.where(EventID == event_index)[0][0]
+        except:
+            print('Event ID does not exist in the ROOT file!')
+            raise
+
+        print(f'Entry ID: {event}')
+        print(f'Event ID: {event_index}')
+
+        xtemp = tree['Hit_X'].array(library='np')[event]
+        ytemp = tree['Hit_Y'].array(library='np')[event]
         x = np.zeros_like(xtemp)
         y = np.zeros_like(ytemp)
-        z = np.round(Hit_Z[event_index] / LayerThick).astype(int)
-        energy = Hit_Energy[event_index]
+        z = np.round(tree['Hit_Z'].array(library='np')[event] / LayerThick).astype(int)
+        energy = tree['Hit_Energy'].array(library='np')[event]
 
-        assert len(x) == len(y)
-        assert len(x) == len(z)
-        assert len(x) == len(energy)
+        assert len(x) == len(y) == len(z) == len(energy)
 
         if staggered:
             for i in np.arange(len(z)):
                 if z[i] % 2 == 0:
                     x[i] = np.round(xtemp[i] / CellWidthX - 0.25).astype(int)
                     y[i] = np.round(ytemp[i] / CellWidthY - 0.25).astype(int)
-                    # if abs(xtemp[i] / CellWidthX - 0.25) >= 10 or abs(ytemp[i] / CellWidthY - 0.25) >= 10:
-                    #     print(xtemp[i] / CellWidthX - 0.25, ytemp[i] / CellWidthY - 0.25)
                 else:
                     x[i] = np.round(xtemp[i] / CellWidthX + 0.25).astype(int)
                     y[i] = np.round(ytemp[i] / CellWidthY + 0.25).astype(int)
-                    # if abs(xtemp[i] / CellWidthX + 0.25) >= 10 or abs(ytemp[i] / CellWidthY + 0.25) >= 10:
-                    #     print(xtemp[i] / CellWidthX + 0.25, ytemp[i] / CellWidthY + 0.25)
         else:
             x[i] = np.round(xtemp[i] / CellWidthX).astype(int)
             y[i] = np.round(ytemp[i] / CellWidthY).astype(int)
@@ -54,7 +54,7 @@ def read_file(fname: str, tree: str, event_index: int, staggered: bool):
         return xnew, ynew, znew, enew
 
 
-def plot(fname: str, tree: str, event_index: int, title: str, staggered: bool):
+def plot(fname: str, tree: str, run_index: int, event_index: int, title: str, staggered: bool):
     x, y, z, energy = read_file(fname, tree, event_index, staggered)
     energy_norm = energy / np.max(energy)
 
@@ -62,13 +62,6 @@ def plot(fname: str, tree: str, event_index: int, title: str, staggered: bool):
 
     WidthX = (nCellX + 0.5 * staggered) * CellWidthX
     WidthY = (nCellY + 0.5 * staggered) * CellWidthY
-
-    # if staggered:
-    #     WidthX = (nCellX + 0.5) * CellWidthX
-    #     WidthY = (nCellY + 0.5) * CellWidthY
-    # else:
-    #     WidthX = nCellX * CellWidthX
-    #     WidthY = nCellY * CellWidthY
 
     ratioX = WidthX / (LayerThick * (nLayer + 1))
     ratioY = 1
@@ -93,16 +86,6 @@ def plot(fname: str, tree: str, event_index: int, title: str, staggered: bool):
         else:
             xnew = np.arange(x[i] - 1, x[i] + 1) + 0.25 * staggered
             ynew = np.arange(y[i] - 1, y[i] + 1) + 0.25 * staggered
-        # if staggered:
-        #     if z[i] % 2 == 0:
-        #         xnew = np.arange(x[i] - 1, x[i] + 1) + 0.75
-        #         ynew = np.arange(y[i] - 1, y[i] + 1) + 0.75
-        #     else:
-        #         xnew = np.arange(x[i] - 1, x[i] + 1) + 0.25
-        #         ynew = np.arange(y[i] - 1, y[i] + 1) + 0.25
-        # else:
-        #     xnew = np.arange(x[i] - 1, x[i] + 1)
-        #     ynew = np.arange(y[i] - 1, y[i] + 1)
 
         xnew, ynew = np.meshgrid(xnew, ynew)
         znew = z[i] * np.ones(xnew.shape)
@@ -143,6 +126,10 @@ def plot(fname: str, tree: str, event_index: int, title: str, staggered: bool):
     ax_xy.set_zlabel("Y", size='large', labelpad=-10)
 
     fig.suptitle(title, size='xx-large')
+
+    ax.text2D(0.05, 0.95, f'Run ID: {run_index}\nEvent ID: {event_index}', transform=ax.transAxes)
+    ax.text2D(0.8, 0.95, r'$E_\mathrm{total} =$' + f'{np.sum(energy):.3f} MeV\n' + r'$E_\mathrm{max} =$' + f'{np.max(energy):.3f} MeV', transform=ax.transAxes)
+
     ax.view_init(elev=20, azim=-35, roll=0)
     ax_xz.view_init(elev=90, azim=0, roll=0)
     ax_xy.view_init(elev=0, azim=-90, roll=0)
@@ -155,7 +142,8 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--tree",      type=str, default='dp', help="Input tree name (default: dp)")
     parser.add_argument("-g", "--staggered", type=int, default=1,    choices=[0, 1], help="Staggered structure")
     parser.add_argument("-i", "--title",     type=str, default='',   help="Title of display figure")
-    parser.add_argument("-e", "--event",     type=int, default=0,    help="The event to be displayed")
+    parser.add_argument("-r", "--run",       type=int, default=0,    help="Run ID of the event to be displayed")
+    parser.add_argument("-e", "--event",     type=int, default=0,    help="Event ID")
     parser.add_argument("-d", "--dir",       type=str, default=None, help="Directory to save the plot")
     parser.add_argument("-o", "--output",    type=str, default=None, help="Output file name")
     parser.add_argument("-s", "--show",      type=int, default=1,    choices=[0, 1], help="Instantly display or not")
@@ -165,12 +153,13 @@ if __name__ == '__main__':
     tree = args.tree
     staggered = args.staggered
     title = args.title
+    run_index = args.run
     event_index = args.event
     save_dir = args.dir
     output = args.output
     show = args.show
 
-    plot(filename, tree, event_index, title, staggered)
+    plot(filename, tree, run_index, event_index, title, staggered)
 
     if save_dir and output:
         plt.savefig(join(save_dir, output), bbox_inches='tight')

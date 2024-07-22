@@ -95,23 +95,31 @@ Int_t main(Int_t argc, Char_t* argv[])
         cout << "----> Training and testing..." << endl;
         cout << "----> Tree: " << tree << endl;
 
+        // Add spectators, which are not used in training, test or evaluation, here
+        p->AddSpec("EventNumber",      "Event ID");
+        p->AddSpec("RecTrk2_track_No", "Track number in recoil tracker");
+        p->AddSpec("RunNumber",        "Run ID");
+        p->AddSpec("TagTrk2_track_No", "Track number in tagging tracker");
+
+        // Add variables to be trained, tested and evaluated here
         p->AddVar("COG_X_mean",         'D');
         p->AddVar("COG_Y_mean",         'D');
         p->AddVar("COG_Z_mean",         'D');
 
-        p->AddVar("E1E3",               'D');
+        p->AddVar("E1E3_centre",        'D');
         p->AddVar("E1Edep",             'D');
-        p->AddVar("E3E5",               'D');
-        p->AddVar("E3E7",               'D');
+        p->AddVar("E3E5_centre",        'D');
+        p->AddVar("E3E7_centre",        'D');
         p->AddVar("E3Edep",             'D');
         p->AddVar("E5Edep",             'D');
         p->AddVar("E7Edep",             'D');
         p->AddVar("ECAL_Cluster_N",     'I');
         p->AddVar("Ecell_max",          'D');
-        p->AddVar("Ecell_max_3",        'D');
-        p->AddVar("Ecell_max_5",        'D');
-        p->AddVar("Ecell_max_7",        'D');
         p->AddVar("Ecell_second",       'D');
+        p->AddVar("Ecentre",            'D');
+        p->AddVar("Ecentre_3",          'D');
+        p->AddVar("Ecentre_5",          'D');
+        p->AddVar("Ecentre_7",          'D');
         p->AddVar("Eclus_max",          'D');
         p->AddVar("Eclus_max_sec_diff", 'D');
         p->AddVar("Eclus_max_sec_dist", 'D');
@@ -131,35 +139,31 @@ Int_t main(Int_t argc, Char_t* argv[])
         p->AddVar("shower_density",     'D');
         p->AddVar("shower_end",         'I');
         p->AddVar("shower_layer",       'I');
-        p->AddVar("shower_layer_ratio", 'D');
         p->AddVar("shower_length",      'I');
         p->AddVar("shower_radius",      'D');
-        p->AddVar("shower_start",       'I');
+        p->AddVar("weighted_radius",    'D');
         p->AddVar("xwidth",             'D');
         p->AddVar("ywidth",             'D');
         p->AddVar("zdepth",             'D');
 
-        const Int_t energy_points = 200;
-        string path = "/lustre/collider/chenjiyuan/dss-pid/run/e-signal/root/";
+        // Add training and test events here
+        // Signals: (1, 5, 10, 50, 100, 500, 800, 1000) MeV
+        // Backgrounds:  en_ecal, en_target, gmm_ecal, gmm_target, pn_target;  inclusive
+        const unordered_map<string, Int_t> bkg_num = { {"en_ecal", 200}, {"en_target", 20}, {"gmm_ecal", 25}, {"gmm_target", 250}, {"pn_target", 15}, {"inclusive", 5} };
+        const string path = "/lustre/collider/chenjiyuan/dss-pid/run/dp-signal/";
+        const string bkg = "en_ecal";
+        const string bkg_path = (bkg == "inclusive") ? "inclusive/root/" : "rare/" + bkg + "/";
 
-        /* | Particle | Training  |    Test    |
-         * | --------------------------------- |
-         * |    e-    |  1--200   |  401--600  |
-         * |   pi-    | 201--400  |  601--800  |
-         * |  gamma   | 801--1000 | 1000--1200 |
-         */
+        const Int_t mass = 10;    // In MeV
+        const Int_t bkg_points = bkg_num.at(bkg);
 
-        for (Int_t i = 1; i <= energy_points; ++i)
+        p->AddTrainSig(path + "signal/root/training/Mass" + to_string(mass) + "MeV/Mass" + to_string(mass) + "MeV.root", tree);
+        p->AddTestSig( path + "signal/root/test/Mass"     + to_string(mass) + "MeV/Mass" + to_string(mass) + "MeV.root", tree);
+
+        for (Int_t i = 1; i <= bkg_points; ++i)
         {
-            // Signal
-            p->AddTrainSig(path + "training/job" + to_string(i) + "_e-_" + to_string(10 * i) + "MeV/e-_" + to_string(10 * i) + "MeV.root", tree);
-            p->AddTestSig( path + "test/job" + to_string(400 + i) + "_e-_" + to_string(10 * i) + "MeV/e-_" + to_string(10 * i) + "MeV.root", tree);
-
-            // Background
-            p->AddTrainBkg(path + "training/job" + to_string(200 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
-            p->AddTestBkg( path + "test/job" + to_string(600 + i) + "_pi-_" + to_string(10 * i) + "MeV/pi-_" + to_string(10 * i) + "MeV.root", tree);
-//            p->AddTrainBkg(path + "training/job" + to_string(800 + i) + "_gamma_" + to_string(10 * i) + "MeV/gamma_" + to_string(10 * i) + "MeV.root", tree);
-//            p->AddTestBkg( path + "test/job" + to_string(1000 + i) + "_gamma_" + to_string(10 * i) + "MeV/gamma_" + to_string(10 * i) + "MeV.root", tree);
+            p->AddTrainBkg(path + bkg_path + "training/job" + to_string(i) + "/" + bkg + "_" + to_string(i) + ".root",                       tree);
+            p->AddTestBkg( path + bkg_path + "test/job" + to_string(i + bkg_points) + "/" + bkg + "_" + to_string(i + bkg_points) + ".root", tree);
         }
 
         p->TrainBDT();
