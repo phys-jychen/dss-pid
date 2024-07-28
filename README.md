@@ -65,7 +65,7 @@ iPID -b    # 'b' stands for 'BDT'
 iPID -b -t [tree]
 ```
 
-Eventually, you can see the output file containing the data obtained during training and test (`TMVAMulticlass.root`) in your current directory.
+Eventually, you can see the output file containing the data obtained during training and test in your current directory.
 
 Possibly you need to know the performance of BDT on the validation dataset or apply it to other scenarios. In either case, execute:
 ```shell
@@ -77,7 +77,7 @@ iPID -c -f [file] -t [tree]
 Then, the BDT response is stored in the output ROOT file, whose name has a prefix ‘bdt’, in your current directory. While modifying `src/BDT.cxx`, make sure that the input variables are identical to those in `bdt.cxx`, including the order!
 
 ### Printing to CSV
-After the file `TMVAMulticlass.root` is created, you can plot the ROC (receiver operating characteristic) curves to understand the performance of BDT better. To do so, you have to dump the true positive (TP) values, true negative (TN) values, etc. to make the plot. Execute:
+After the TMVA output file of classification is created, you can plot the ROC (receiver operating characteristic) curves to understand the performance of BDT better. To do so, you have to dump the true positive (TP) values, true negative (TN) values, etc. to make the plot. Execute:
 ```shell
 iPID -p -f [TMVA output file]    # 'p' stands for 'print'
 ```
@@ -130,10 +130,39 @@ Every time you log in to the cluster, and right before the first time of running
 source <build_dir>/setup.sh
 ```
 
-By now, the compilation have been finished. Prepare your datasets, and have fun! :relaxed:
+By now, the compilation has finished. Prepare your datasets, and have fun! :relaxed:
 
-## To-Do
-Definitions of some variables need further check.
+## Change Log
+
+### 27 February 2024
+
+Added event display. The staggered structure has been taken into consideration.
+
+### 2 March 2024
+
+Cluster information is saved and used in BDT.
+
+### 10 April 2024
+
+Introduced energy projection to three axes and three planes.
+
+### 18 July 2024
+
+Significant modifications of the definitions.
+
+- The scales of FD are restricted to below the cell number in $x$ and $y$ directions.
+- Some 2D variables have been changed to 3D, e.g. energy ratios, shower radius;
+- Staggered structure has been taken into account, e.g. 3 × 3 cells in the same layer of the hit, but 2 × 2 cells in consecutive layers;
+- The event axis is obtained from 3D linear fitting instead of simply defined as parallel to $z$ axis.
+
+### 22 July 2024
+
+Added a function to dump the true positive (TP) and true negative (TN) values for plotting ROC curves.
+
+### 28 July 2024
+
+- Modified the BDT part to accelerate signal–background BDT.
+- Split the `EventNumber` into two parts, one for storing the 5 lowest digits, and the other for storing the highest digits. This is designed to overcome the shortcomings of TMVA package that spectators are also automatically converted to `float` type.
 
 ## Reference
-The framework of this project comes from [ahcal-pid](https://github.com/phys-jychen/ahcal-pid). Since their structures are largely different, the definitions of most of the variables have been modified. Besides, the execution has been greatly simplified.
+The framework of this project comes from [ahcal-pid](https://github.com/phys-jychen/ahcal-pid). Since the structures of these detectors are largely different, the definitions of most of the variables have been modified. Besides, the execution has been greatly simplified.

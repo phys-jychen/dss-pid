@@ -43,17 +43,19 @@ Int_t PID::TrainBDT()
     }
 
     // Create a ROOT output file where ntuples, histograms, etc. are stored
-    TString outfileName( "TMVAMulticlass.root" );
-    TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
+    TString type = "TMVAClassification";
+    TString outfileName = type + ".root";
+    TFile* outputFile = new TFile( outfileName, "RECREATE" );
 
-    TMVA::Factory* factory = new TMVA::Factory( "TMVAMulticlass", outputFile,
-                                               "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=multiclass" );
-
+    TMVA::Factory* factory = new TMVA::Factory( type, outputFile,
+                                               "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=Classification" );
     TMVA::DataLoader* dataloader = new TMVA::DataLoader("dataset");
+
+    // Variables and spectators should be added here
     for (const auto& i : var)
         dataloader->AddVariable(i.first, i.second);
-    for (const auto& i : spec)
-        dataloader->AddSpectator(i.first, i.second);
+    for (const auto& j : spec)
+        dataloader->AddSpectator(j.first, j.second);
 
     // Signal and background trees should be added here
     for (auto i : trsig)
@@ -71,7 +73,8 @@ Int_t PID::TrainBDT()
 
     dataloader->PrepareTrainingAndTestTree( cut_sig, cut_bkg, "SplitMode=Random:NormMode=NumEvents:!V" );
 
-    factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG", "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.50:nCuts=20:MaxDepth=2" );
+    factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG",
+                         "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.50:nCuts=20:MaxDepth=2" );
 
     // Now you can ask the factory to train, test, and evaluate the variables
 
@@ -84,13 +87,11 @@ Int_t PID::TrainBDT()
     // Evaluate and compare performance of all configured MVAs
     factory->EvaluateAllMethods();
 
-    // --------------------------------------------------------------
-
     // Save the output
     outputFile->Close();
 
-    cout << "==> ROOT file written: " << outputFile->GetName() << endl;
-    cout << "==> TMVAClassification finished!" << endl;
+    cout << "==> ROOT file written to " << outputFile->GetName() << endl;
+    cout << "==> " << type << " finished!" << endl;
 
     delete factory;
     delete dataloader;
@@ -110,10 +111,11 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
 
     map<string, Int_t> Use;
     Use["BDTG"] = 1;
-    cout << "==> Start TMVAMulticlassApplication" << endl;
+    cout << "==> Start TMVAClassificationApplication" << endl;
     TMVA::Reader* reader = new TMVA::Reader( "!Color:!Silent" );
 
-    Float_t  bdt_event_number;
+    Float_t  bdt_eventid_high;
+    Float_t  bdt_eventid_low;
     Float_t  bdt_RecTrk2_track_No;
     Float_t  bdt_run_number;
     Float_t  bdt_TagTrk2_track_No;
@@ -162,7 +164,8 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     Float_t  bdt_ywidth;
     Float_t  bdt_zdepth;
 
-    reader->AddSpectator("EventNumber",      &bdt_event_number);
+    reader->AddSpectator("EventID_High",     &bdt_eventid_high);
+    reader->AddSpectator("EventID_Low",      &bdt_eventid_low);
     reader->AddSpectator("RecTrk2_track_No", &bdt_RecTrk2_track_No);
     reader->AddSpectator("RunNumber",        &bdt_run_number);
     reader->AddSpectator("TagTrk2_track_No", &bdt_TagTrk2_track_No);
@@ -211,8 +214,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     reader->AddVariable("ywidth",             &bdt_ywidth);
     reader->AddVariable("zdepth",             &bdt_zdepth);
 
-    reader->BookMVA("BDTG method", TString("dataset/weights/TMVAMulticlass_BDTG.weights.xml"));
-    cout << "Booked" << endl;
+    reader->BookMVA("BDTG method", "dataset/weights/TMVAClassification_BDTG.weights.xml");
 
     vector<string> rdf_input = {};
 
@@ -301,7 +303,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
          Double_t weighted_radius,
          Double_t xwidth,
          Double_t ywidth,
-         Double_t zdepth)->Float_t
+         Double_t zdepth)->Double_t
     {
         bdt_COG_X_mean         = COG_X_mean;
         bdt_COG_Y_mean         = COG_Y_mean;
@@ -346,7 +348,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
         bdt_xwidth             = xwidth;
         bdt_ywidth             = ywidth;
         bdt_zdepth             = zdepth;
-        return (reader->EvaluateMulticlass( "BDTG method" ))[0];
+        return (reader->EvaluateMVA( "BDTG method" ));
     }, rdf_input)
     .Snapshot(tree, outname);
     return 0;

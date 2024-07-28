@@ -31,6 +31,8 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
     outname = outname.substr(outname.find_last_of('/') + 1);
     outname = "hit_" + outname;
     auto fout = dm->Define("ntotal", "(Int_t) ECAL_ECell_XYZ.size()")
+    .Define("EventID_High", "(Long_t) EventNumber / 100000")
+    .Define("EventID_Low", "(Long_t) EventNumber % 100000")
     .Define("Hit_X", [] (const vector<Double_t>& ECAL_ECell_XYZ, const Int_t& ntotal)->vector<Double_t>
     {
         vector<Double_t> Hit_X;
@@ -38,15 +40,8 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
         {
             if (ECAL_ECell_XYZ.at(i) <= threshold)
                 continue;
-            Int_t layer = i / (nCellsX * nCellsY);
-            Double_t x = (i % nCellsX - nCellsXBias) * CellWidthX;
-            if (staggered_x)
-            {
-                if (layer % 2 == 0)
-                    x += 0.25 * CellWidthX;
-                else
-                    x -= 0.25 * CellWidthX;
-            }
+            const Int_t layer = i / (nCellsX * nCellsY);
+            const Double_t x = (i % nCellsX - nCellsXBias + (0.25 - 0.5 * (layer % 2 == 1)) * staggered_x) * CellWidthX;
             Hit_X.emplace_back(x);
         }
         return Hit_X;
@@ -59,14 +54,7 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
             if (ECAL_ECell_XYZ.at(i) <= threshold)
                 continue;
             Int_t layer = i / (nCellsX * nCellsY);
-            Double_t y = ((i % (nCellsX * nCellsY)) / nCellsX - nCellsYBias) * CellWidthY;
-            if (staggered_y)
-            {
-                if (layer % 2 == 0)
-                    y += 0.25 * CellWidthY;
-                else
-                    y -= 0.25 * CellWidthY;
-            }
+            const Double_t y = ((i % (nCellsX * nCellsY)) / nCellsX - nCellsYBias + (0.25 - 0.5 * (layer % 2 == 1)) * staggered_y) * CellWidthY;
             Hit_Y.emplace_back(y);
         }
         return Hit_Y;
@@ -78,7 +66,7 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
         {
             if (ECAL_ECell_XYZ.at(i) <= threshold)
                 continue;
-            Double_t z = (i / (nCellsX * nCellsY)) * Thick;
+            const Double_t z = (i / (nCellsX * nCellsY)) * Thick;
             Hit_Z.emplace_back(z);
         }
         return Hit_Z;
@@ -88,10 +76,10 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
         vector<Int_t> CellID;
         for (Int_t i = 0; i < Hit_X.size(); ++i)
         {
-            Int_t x = round(Hit_X.at(i) / CellWidthX + nCellsXBias);
-            Int_t y = round(Hit_Y.at(i) / CellWidthY + nCellsYBias);
-            Int_t z = round(Hit_Z.at(i) / Thick);
-            Int_t index = 10000 * z + 100 * x + y;
+            const Int_t x = round(Hit_X.at(i) / CellWidthX + nCellsXBias);
+            const Int_t y = round(Hit_Y.at(i) / CellWidthY + nCellsYBias);
+            const Int_t z = round(Hit_Z.at(i) / Thick);
+            const Int_t index = 10000 * z + 100 * x + y;
             CellID.emplace_back(index);
         }
         return CellID;
@@ -111,26 +99,14 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
     .Define("Etotal", [] (const vector<Double_t>& Hit_Energy)->Double_t
     {
         Double_t Etotal = 0.0;
-        for (Double_t i : Hit_Energy)
+        for (const Double_t& i : Hit_Energy)
             Etotal += i;
         return Etotal;
     }, {"Hit_Energy"})
-    .Define("Eclus_max", [] (const Int_t& ECAL_Cluster_N, const vector<Double_t>& ECAL_Cluster_E)->Double_t
-    {
-        Double_t Eclus_max = (ECAL_Cluster_N >= 1) ? ECAL_Cluster_E.at(0) : 0.0;
-        return Eclus_max;
-    }, {"ECAL_Cluster_N", "ECAL_Cluster_E"})
-    .Define("Eclus_second", [] (const Int_t& ECAL_Cluster_N, const vector<Double_t>& ECAL_Cluster_E)->Double_t
-    {
-        Double_t Eclus_second = (ECAL_Cluster_N >= 2) ? ECAL_Cluster_E.at(1) : 0.0;
-        return Eclus_second;
-    }, {"ECAL_Cluster_N", "ECAL_Cluster_E"})
+    .Define("Eclus_max", "(ECAL_Cluster_N >= 1) ? ECAL_Cluster_E[0] : 0.0")
+    .Define("Eclus_second", "(ECAL_Cluster_N >= 2) ? ECAL_Cluster_E[1] : 0.0")
     .Define("Eclus_max_sec_diff", "Eclus_max - Eclus_second")
-    .Define("Eclus_max_sec_dist", [] (const Int_t& ECAL_Cluster_N, const vector<Double_t>& ECAL_Cluster_X, const vector<Double_t>& ECAL_Cluster_Y, const vector<Double_t>& ECAL_Cluster_Z)->Double_t
-    {
-        Double_t Eclus_max_sec_dist = (ECAL_Cluster_N >= 2) ? 0.1 * Sqrt(Power(ECAL_Cluster_X.at(0) - ECAL_Cluster_X.at(1), 2) + Power(ECAL_Cluster_Y.at(0) - ECAL_Cluster_Y.at(1), 2) + Power(ECAL_Cluster_Z.at(0) - ECAL_Cluster_Z.at(1), 2)) : 0.0;
-        return Eclus_max_sec_dist;
-    }, {"ECAL_Cluster_N", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z"})
+    .Define("Eclus_max_sec_dist", "(ECAL_Cluster_N >= 2) ? 0.1 * TMath::Sqrt(TMath::Power(ECAL_Cluster_X[0] - ECAL_Cluster_X[1], 2) + TMath::Power(ECAL_Cluster_Y[0] - ECAL_Cluster_Y[1], 2) + TMath::Power(ECAL_Cluster_Z[0] - ECAL_Cluster_Z[1], 2)) : 0.0")    // Convert from mm to cm
     .Define("clus_10", [] (const vector<Double_t>& ECAL_Cluster_E, const Int_t& ECAL_Cluster_N, const Double_t& Eclus_max)->Int_t
     {
         Int_t clus_10 = ECAL_Cluster_N;
@@ -166,7 +142,7 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
     .Define("clus_sub_match", [] (const vector<Int_t>& ECAL_ClusterSub_matchRecTrk)->Int_t
     {
         Int_t clus_sub_match = 0;
-        for (int i : ECAL_ClusterSub_matchRecTrk)
+        for (const Int_t& i : ECAL_ClusterSub_matchRecTrk)
             clus_sub_match += (i >= 0);
         return clus_sub_match;
     }, {"ECAL_ClusterSub_matchRecTrk"})

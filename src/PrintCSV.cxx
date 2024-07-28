@@ -9,7 +9,7 @@ Int_t PID::PrintCSV(const string& file)
 
     const Int_t sig_total = t->GetEntries("classID == 0");
     const Int_t bkg_total = t->GetEntries("classID == 1");
-    const Int_t nsteps = 1000000;
+    const Int_t nsteps = 2000000;
 
     ofstream num("./Numbers.csv");
     num << "threshold,"
@@ -22,10 +22,10 @@ Int_t PID::PrintCSV(const string& file)
 
     for (Int_t i = 0; i < nsteps; ++i)
     {
-        if (i > 0.001 * nsteps && i < 0.999 * nsteps && (i + 1) % 1000 != 0)
+        if (i > 0.0005 * nsteps && i < 0.9995 * nsteps && (i + 1) % 1000 != 0)
             continue;
 
-        Double_t selection = (Double_t) i / nsteps;
+        Double_t selection = (Double_t) 2 * i / nsteps - 1;
         Int_t nsig = t->GetEntries("classID == 0 && BDTG > " + (TString) to_string(selection));
         Int_t nbkg = t->GetEntries("classID == 1 && BDTG > " + (TString) to_string(selection));
 
@@ -35,8 +35,8 @@ Int_t PID::PrintCSV(const string& file)
             << nsig << ","
             << nbkg << "\n";
 
-        if (((i <= 0.001 * nsteps || i >= 0.999 * nsteps) && (i + 1) % 100 == 0)
-            || (i > 0.001 * nsteps && i < 0.999 * nsteps && (i + 1) % 20000 == 0))
+        if (((i <= 0.0005 * nsteps || i >= 0.9995 * nsteps) && (i + 1) % 100 == 0)
+            || (i > 0.0005 * nsteps && i < 0.9995 * nsteps && (i + 1) % 20000 == 0))
             cout << "Cycle " << i + 1 << " / " << nsteps << " finished!" << endl;
     }
 

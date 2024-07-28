@@ -9,7 +9,7 @@ Int_t main(Int_t argc, Char_t* argv[])
     Int_t print = 0;
     Int_t help = 0;
 
-    for (Int_t i = 1; i < argc; i++)
+    for (Int_t i = 1; i < argc; ++i)
     {
         if (string(argv[i]) == string("--help"))
         {
@@ -70,9 +70,7 @@ Int_t main(Int_t argc, Char_t* argv[])
         cout << "--> Saving branches..." << endl;
         cout << "--> File: " << file << endl;
         cout << "--> Tree: " << tree << endl << endl;
-
         PID::SaveBranches(file, tree);
-
         cout << "--> Branch selection finished!" << endl;
     }
 
@@ -81,9 +79,7 @@ Int_t main(Int_t argc, Char_t* argv[])
         cout << "--> Collecting original hits..." << endl;
         cout << "--> File: " << file << endl;
         cout << "--> Tree: " << tree << endl;
-
         PID::OriginalHits(file, tree);
-
         cout << "--> Hit collection finished!" << endl;
     }
 
@@ -92,9 +88,7 @@ Int_t main(Int_t argc, Char_t* argv[])
         cout << "---> Reconstructing variables..." << endl;
         cout << "---> File: " << file << endl;
         cout << "---> Tree: " << tree << endl;
-
         PID::GenNtuple(file, tree);
-
         cout << "---> Variable reconstruction finished!" << endl;
     }
 
@@ -104,7 +98,8 @@ Int_t main(Int_t argc, Char_t* argv[])
         cout << "----> Tree: " << tree << endl;
 
         // Add spectators, which are not used in training, test or evaluation, here
-        p->AddSpec("EventNumber",      "Event ID");
+        p->AddSpec("EventID_High",     "Event ID (highest few digits)");
+        p->AddSpec("EventID_Low",      "Event ID (lowest 5 digits)");
         p->AddSpec("RecTrk2_track_No", "Track number in recoil tracker");
         p->AddSpec("RunNumber",        "Run ID");
         p->AddSpec("TagTrk2_track_No", "Track number in tagging tracker");
@@ -157,7 +152,7 @@ Int_t main(Int_t argc, Char_t* argv[])
         // Add training and test events here
         // Signals: (1, 5, 10, 50, 100, 500, 800, 1000) MeV
         // Backgrounds:  en_ecal, en_target, gmm_ecal, gmm_target, pn_target;  inclusive
-        const unordered_map<string, Int_t> bkg_num = { {"en_ecal", 200}, {"en_target", 20}, {"gmm_ecal", 25}, {"gmm_target", 250}, {"pn_target", 15}, {"inclusive", 5} };
+        const unordered_map<string, Int_t> bkg_num = { {"en_ecal", 16}, {"en_target", 16}, {"gmm_ecal", 16}, {"gmm_target", 16}, {"pn_target", 16}, {"inclusive", 5} };
         const string path = "/lustre/collider/chenjiyuan/dss-pid/run/dp-signal/";
         const string bkg = "en_ecal";
         const string bkg_path = (bkg == "inclusive") ? "inclusive/root/" : "rare/" + bkg + "/";
@@ -184,9 +179,7 @@ Int_t main(Int_t argc, Char_t* argv[])
         cout << "----> Classifying..." << endl;
         cout << "----> File: " << file << endl;
         cout << "----> Tree: " << tree << endl << endl;
-
         PID::BDTNtuple(file, tree);
-
         cout << "----> Classification finished!" << endl;
     }
 
@@ -194,16 +187,14 @@ Int_t main(Int_t argc, Char_t* argv[])
     {
         cout << "-----> Printing to CSV..." << endl;
         cout << "-----> File: " << file << endl;
-
         PID::PrintCSV(file);
-
         cout << "-----> Printing to CSV finished!" << endl;
     }
 
     else if (help == 0)
     {
         cout << "Invalid input." << endl;
-        cout << "Run \"iPID --help\" to display help information." << endl << endl;
+        cout << "Run \'iPID --help\' to display help information." << endl << endl;
     }
 
     delete p;
