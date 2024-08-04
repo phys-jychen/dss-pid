@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.16)
 #set(CMAKE_CXX_STANDARD 17)
 
 # Name and version of the project
-project(dss_pid VERSION 1.3.0 LANGUAGES C CXX)
+project(dss_pid VERSION 2.0.0 LANGUAGES C CXX)
 
 # Type of CMake
 set(CMAKE_BUILD_TYPE Debug)

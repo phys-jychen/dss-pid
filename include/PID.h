@@ -76,24 +76,14 @@ public:
 
     static Int_t GenNtuple(const string& file, const string& tree);
 
-    void AddTrainSig(const string& file, const string& tree)
+    void AddTrainSig(const string& file, const string& tree, const string& type, const Double_t& weight)
     {
-        train_sig.insert(pair<TString, TString>(TString(file), TString(tree)));
+        train_sig.insert(pair<pair<TString, TString>, pair<TString, Double_t>>(pair<TString, TString>(TString(file), TString(tree)), pair(TString(type), weight)));
     }
 
-    void AddTrainBkg(const string& file, const string& tree)
+    void AddTestSig(const string& file, const string& tree, const string& type, const Double_t& weight)
     {
-        train_bkg.insert(pair<TString, TString>(TString(file), TString(tree)));
-    }
-
-    void AddTestSig(const string& file, const string& tree)
-    {
-        test_sig.insert(pair<TString, TString>(TString(file), TString(tree)));
-    }
-
-    void AddTestBkg(const string& file, const string& tree)
-    {
-        test_bkg.insert(pair<TString, TString>(TString(file), TString(tree)));
+        test_sig.insert(pair<pair<TString, TString>, pair<TString, Double_t>>(pair<TString, TString>(TString(file), TString(tree)), pair(TString(type), weight)));
     }
 
     void AddVar(const string& v, const Char_t& type)
@@ -117,9 +107,7 @@ public:
         var.clear();
         spec.clear();
         train_sig.clear();
-        train_bkg.clear();
         test_sig.clear();
-        test_bkg.clear();
     }
 
 
@@ -128,10 +116,8 @@ private:
 
     map<TString, Char_t> var;
     map<TString, TString> spec;
-    map<TString, TString> train_sig;
-    map<TString, TString> train_bkg;
-    map<TString, TString> test_sig;
-    map<TString, TString> test_bkg;
+    map<pair<TString, TString>, pair<TString, Double_t>> train_sig;
+    map<pair<TString, TString>, pair<TString, Double_t>> test_sig;
 };
 
 #endif

@@ -96,12 +96,12 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
         }
         return Hit_Energy;
     }, {"ECAL_ECell_XYZ", "ntotal"})
-    .Define("Etotal", [] (const vector<Double_t>& Hit_Energy)->Double_t
+    .Define("Edep", [] (const vector<Double_t>& Hit_Energy)->Double_t
     {
-        Double_t Etotal = 0.0;
+        Double_t Edep = 0.0;
         for (const Double_t& i : Hit_Energy)
-            Etotal += i;
-        return Etotal;
+            Edep += i;
+        return Edep;
     }, {"Hit_Energy"})
     .Define("Eclus_max", "(ECAL_Cluster_N >= 1) ? ECAL_Cluster_E[0] : 0.0")
     .Define("Eclus_second", "(ECAL_Cluster_N >= 2) ? ECAL_Cluster_E[1] : 0.0")
@@ -146,29 +146,29 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
             clus_sub_match += (i >= 0);
         return clus_sub_match;
     }, {"ECAL_ClusterSub_matchRecTrk"})
-    .Define("clus_10_tot", [] (const vector<Double_t>& ECAL_Cluster_E, const Int_t& ECAL_Cluster_N, const Double_t& Etotal)->Int_t
+    .Define("clus_10_tot", [] (const vector<Double_t>& ECAL_Cluster_E, const Int_t& ECAL_Cluster_N, const Double_t& Edep)->Int_t
     {
         Int_t clus_10_tot = ECAL_Cluster_N;
         for (Int_t i = 0; i < ECAL_Cluster_N; ++i)
-            if (ECAL_Cluster_E.at(i) <= 0.1 * Etotal)
+            if (ECAL_Cluster_E.at(i) <= 0.1 * Edep)
                 --clus_10_tot;
         return clus_10_tot;
-    }, {"ECAL_Cluster_E", "ECAL_Cluster_N", "Etotal"})
-    .Define("clus_20_tot", [] (const vector<Double_t>& ECAL_Cluster_E, const Int_t& ECAL_Cluster_N, const Double_t& Etotal)->Int_t
+    }, {"ECAL_Cluster_E", "ECAL_Cluster_N", "Edep"})
+    .Define("clus_20_tot", [] (const vector<Double_t>& ECAL_Cluster_E, const Int_t& ECAL_Cluster_N, const Double_t& Edep)->Int_t
     {
         Int_t clus_20_tot = ECAL_Cluster_N;
         for (Int_t i = 0; i < ECAL_Cluster_N; ++i)
-            if (ECAL_Cluster_E.at(i) <= 0.2 * Etotal)
+            if (ECAL_Cluster_E.at(i) <= 0.2 * Edep)
                 --clus_20_tot;
         return clus_20_tot;
-    }, {"ECAL_Cluster_E", "ECAL_Cluster_N", "Etotal"})
+    }, {"ECAL_Cluster_E", "ECAL_Cluster_N", "Edep"})
     .Snapshot(tree, outname);
     delete dm;
 
     TFile* f = new TFile((TString) outname, "READ");
     TTree* t = f->Get<TTree>((TString) tree);
     t->SetBranchStatus("*", true);
-    const vector<TString> deactivate = { "ECAL_ClusterSub_E", "ECAL_ClusterSub_matchRecTrk", "ECAL_ClusterSub_X", "ECAL_ClusterSub_Y", "ECAL_ClusterSub_Z", "ECAL_Cluster_E", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z", "ECAL_ECell_XYZ" };
+    const vector<TString> deactivate = { "ECAL_ClusterSub_E", "ECAL_ClusterSub_matchRecTrk", "ECAL_ClusterSub_X", "ECAL_ClusterSub_Y", "ECAL_ClusterSub_Z", "ECAL_Cluster_E", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z", "ECAL_ECell_XYZ", "ntotal" };
     for (const TString& de : deactivate)
         t->SetBranchStatus(de, false);
     TFile* fnew = new TFile((TString) outname, "RECREATE");

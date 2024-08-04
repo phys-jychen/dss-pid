@@ -84,7 +84,7 @@ iPID -p -f [TMVA output file]    # 'p' stands for 'print'
 
 Then, the CSV file containing TP and TN values will be created in your current directory.
 
-Notice: this process might be time-consuming. If you are working on the cluster of INPAC, IHEP, etc., you might need to submit it as a job.
+Notice: this process might be time-consuming, especially the datasets are large. If you are working on the cluster of INPAC, IHEP, etc., you might need to submit it as a job.
 
 ### Event Display and Energy Projection
 In the directory you have installed, run
@@ -163,6 +163,12 @@ Added a function to dump the true positive (TP) and true negative (TN) values fo
 
 - Modified the BDT part to accelerate signal–background BDT.
 - Split the `EventNumber` into two parts, one for storing the 5 lowest digits, and the other for storing the highest digits. This is designed to overcome the shortcomings of TMVA package that spectators are also automatically converted to `float` type.
+
+### 3 August 2024
+
+- Changed from signal–background separation to multi-class BDT, and added weights for each process. The weights come from [the publication in 2023](https://doi.org/10.1007/s11433-022-1983-8).
+- Removed some variables that are strongly correlated with others.
+- Modified the contents dumped to the CSV file.
 
 ## Reference
 The framework of this project comes from [ahcal-pid](https://github.com/phys-jychen/ahcal-pid). Since the structures of these detectors are largely different, the definitions of most of the variables have been modified. Besides, the execution has been greatly simplified.

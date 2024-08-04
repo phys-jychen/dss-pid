@@ -63,8 +63,6 @@ Int_t main(Int_t argc, Char_t* argv[])
             print = 1;
     }
 
-    PID* p = new PID();
-
     if (sel == 1 && !file.empty())
     {
         cout << "--> Saving branches..." << endl;
@@ -97,6 +95,8 @@ Int_t main(Int_t argc, Char_t* argv[])
         cout << "----> Training and testing..." << endl;
         cout << "----> Tree: " << tree << endl;
 
+        PID* p = new PID();
+
         // Add spectators, which are not used in training, test or evaluation, here
         p->AddSpec("EventID_High",     "Event ID (highest few digits)");
         p->AddSpec("EventID_Low",      "Event ID (lowest 5 digits)");
@@ -112,29 +112,29 @@ Int_t main(Int_t argc, Char_t* argv[])
         p->AddVar("E1E3_centre",        'D');
         p->AddVar("E1Edep",             'D');
         p->AddVar("E3E5_centre",        'D');
-        p->AddVar("E3E7_centre",        'D');
+//        p->AddVar("E3E7_centre",        'D');
         p->AddVar("E3Edep",             'D');
-        p->AddVar("E5Edep",             'D');
+//        p->AddVar("E5Edep",             'D');
         p->AddVar("E7Edep",             'D');
         p->AddVar("ECAL_Cluster_N",     'I');
         p->AddVar("Ecell_max",          'D');
         p->AddVar("Ecell_second",       'D');
         p->AddVar("Ecentre",            'D');
         p->AddVar("Ecentre_3",          'D');
-        p->AddVar("Ecentre_5",          'D');
+//        p->AddVar("Ecentre_5",          'D');
         p->AddVar("Ecentre_7",          'D');
         p->AddVar("Eclus_max",          'D');
-        p->AddVar("Eclus_max_sec_diff", 'D');
+//        p->AddVar("Eclus_max_sec_diff", 'D');
         p->AddVar("Eclus_max_sec_dist", 'D');
         p->AddVar("Eclus_second",       'D');
         p->AddVar("Edep",               'D');
-        p->AddVar("Emax_sec_diff",      'D');
+//        p->AddVar("Emax_sec_diff",      'D');
         p->AddVar("Emax_sec_dist",      'D');
         p->AddVar("Emean",              'D');
 
-        p->AddVar("FD_2D_mean",         'D');
-        p->AddVar("FD_2D_rms",          'D');
-        p->AddVar("FD_3D_mean",         'D');
+//        p->AddVar("FD_2D_mean",         'D');
+//        p->AddVar("FD_2D_rms",          'D');
+//        p->AddVar("FD_3D_mean",         'D');
         p->AddVar("FD_3D_rms",          'D');
 
         p->AddVar("hit_layer",          'I');
@@ -144,7 +144,7 @@ Int_t main(Int_t argc, Char_t* argv[])
         p->AddVar("shower_layer",       'I');
         p->AddVar("shower_length",      'I');
         p->AddVar("shower_radius",      'D');
-        p->AddVar("weighted_radius",    'D');
+//        p->AddVar("weighted_radius",    'D');
         p->AddVar("xwidth",             'D');
         p->AddVar("ywidth",             'D');
         p->AddVar("zdepth",             'D');
@@ -152,24 +152,26 @@ Int_t main(Int_t argc, Char_t* argv[])
         // Add training and test events here
         // Signals: (1, 5, 10, 50, 100, 500, 800, 1000) MeV
         // Backgrounds:  en_ecal, en_target, gmm_ecal, gmm_target, pn_target;  inclusive
-        const unordered_map<string, Int_t> bkg_num = { {"en_ecal", 16}, {"en_target", 16}, {"gmm_ecal", 16}, {"gmm_target", 16}, {"pn_target", 16}, {"inclusive", 5} };
+        const vector<Int_t> mass = { 1, 5, 10, 50, 100, 500, 800, 1000 };    // In MeV
+        const unordered_map<string, pair<Int_t, Double_t>> bkg = { {"en_ecal", {16, 3.25e-6}}, {"en_target", {16, 5.1e-7}}, {"gmm_ecal", {16, 1.63e-6}}, {"gmm_target", {16, 1.5e-8}}, {"pn_target", {16, 1.37e-6}}, {"inclusive", {5, 1.0}} };
         const string path = "/lustre/collider/chenjiyuan/dss-pid/run/dp-signal/";
-        const string bkg = "en_ecal";
-        const string bkg_path = (bkg == "inclusive") ? "inclusive/root/" : "rare/" + bkg + "/";
 
-        const Int_t mass = 10;    // In MeV
-        const Int_t bkg_points = bkg_num.at(bkg);
-
-        p->AddTrainSig(path + "signal/root/training/Mass" + to_string(mass) + "MeV/Mass" + to_string(mass) + "MeV.root", tree);
-        p->AddTestSig( path + "signal/root/test/Mass"     + to_string(mass) + "MeV/Mass" + to_string(mass) + "MeV.root", tree);
-
-        for (Int_t i = 1; i <= bkg_points; ++i)
+        for (const Int_t& i : mass)
         {
-            p->AddTrainBkg(path + bkg_path + "training/job" + to_string(i) + "/" + bkg + "_" + to_string(i) + ".root",                       tree);
-            p->AddTestBkg( path + bkg_path + "test/job" + to_string(i + bkg_points) + "/" + bkg + "_" + to_string(i + bkg_points) + ".root", tree);
+            p->AddTrainSig(path + "signal/root/training/Mass" + to_string(i) + "MeV/Mass" + to_string(i) + "MeV.root", tree, "signal", 1.0);
+            p->AddTestSig( path + "signal/root/test/Mass" + to_string(i) + "MeV/Mass" + to_string(i) + "MeV.root",     tree, "signal", 1.0);
         }
 
+        for (const auto& j : bkg)
+            for (Int_t k = 1; k <= j.second.first; ++k)
+            {
+                const string bkg_path = (j.first == "inclusive") ? "inclusive/root/" : "rare/" + j.first + "/";
+                p->AddTrainSig(path + bkg_path + "training/job" + to_string(k) + "/" + j.first + "_" + to_string(k) + ".root",                               tree, j.first, j.second.second);
+                p->AddTestSig( path + bkg_path + "test/job" + to_string(k + j.second.first) + "/" + j.first + "_" + to_string(k + j.second.first) + ".root", tree, j.first, j.second.second);
+            }
+
         p->TrainBDT();
+        delete p;
 
         cout << "----> Training and testing finished!" << endl;
 	}
@@ -195,8 +197,9 @@ Int_t main(Int_t argc, Char_t* argv[])
     {
         cout << "Invalid input." << endl;
         cout << "Run \'iPID --help\' to display help information." << endl << endl;
+
+        return -1;
     }
 
-    delete p;
     return 0;
 }

@@ -64,14 +64,6 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
             layer_energy.at(layer.at(i)) += Hit_Energy.at(i);
         return layer_energy;
     }, {"layer", "Hit_Energy", "nhits"})
-    // Total energy deposition
-    .Define("Edep", [] (const vector<Double_t>& Hit_Energy)->Double_t
-    {
-        Double_t sum = 0.0;
-        for (Double_t i : Hit_Energy)
-            sum += i;
-        return sum;
-    }, {"Hit_Energy"})
     // Average energy deposition of the hits
     .Define("Emean", "(nhits > 0) ? Edep / nhits : 0.0")
     // The average centre of gravity, in x direction
@@ -410,18 +402,18 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         return Ecell_max_7;
     }, {"CellID", "Hit_Energy", "Ecell_max_id"})
     // Energy deposition of the cell with maximum energy deposition, divided by the total energy deposition in the 3*3*3, 5*5*5 or 7*7*7 cells around it
-    .Define("E1E3", "(nhits > 0) ? Ecell_max / Ecell_max_3 : 0.0")
-    .Define("E1E5", "(nhits > 0) ? Ecell_max / Ecell_max_5 : 0.0")
-    .Define("E1E7", "(nhits > 0) ? Ecell_max / Ecell_max_7 : 0.0")
+    .Define("E1E3", "(nhits > 0 && Ecell_max_3 > 0) ? Ecell_max / Ecell_max_3 : -1.0")
+    .Define("E1E5", "(nhits > 0 && Ecell_max_5 > 0) ? Ecell_max / Ecell_max_5 : -1.0")
+    .Define("E1E7", "(nhits > 0 && Ecell_max_7 > 0) ? Ecell_max / Ecell_max_7 : -1.0")
     // Energy deposition of the 3*3*3 cells with the centre having maximum energy deposition, divided by the total energy deposition in the 5*5*5 or 7*7*7 cells around it
-    .Define("E3E5", "(nhits > 0) ? Ecell_max_3 / Ecell_max_5 : 0.0")
-    .Define("E3E7", "(nhits > 0) ? Ecell_max_3 / Ecell_max_7 : 0.0")
+    .Define("E3E5", "(nhits > 0 && Ecell_max_5 > 0) ? Ecell_max_3 / Ecell_max_5 : -1.0")
+    .Define("E3E7", "(nhits > 0 && Ecell_max_7 > 0) ? Ecell_max_3 / Ecell_max_7 : -1.0")
     // Energy deposition of the cell with maximum energy deposition, divided by total energy deposition
-    .Define("E1Edep", "(nhits > 0) ? Ecell_max / Edep : 0.0")
+    .Define("E1Edep", "(nhits > 0) ? Ecell_max / Edep : -1.0")
     // Energy deposition of the 3*3*3, 5*5*5 or 7*7*7 cells with the centre having maximum energy deposition, divided by the total energy deposition
-    .Define("E3Edep", "(nhits > 0) ? Ecell_max_3 / Edep : 0.0")
-    .Define("E5Edep", "(nhits > 0) ? Ecell_max_5 / Edep : 0.0")
-    .Define("E7Edep", "(nhits > 0) ? Ecell_max_7 / Edep : 0.0")
+    .Define("E3Edep", "(nhits > 0) ? Ecell_max_3 / Edep : -1.0")
+    .Define("E5Edep", "(nhits > 0) ? Ecell_max_5 / Edep : -1.0")
+    .Define("E7Edep", "(nhits > 0) ? Ecell_max_7 / Edep : -1.0")
     // RMS value of the positions of all the hits on a layer
     .Define("layer_rms", [] (const vector<Double_t>& Hit_X, const vector<Double_t>& Hit_Y, const vector<Int_t>& layer, const vector<Double_t>& Hit_Energy, const Int_t& nhits, const Double_t& COG_X_mean, const Double_t& COG_Y_mean)->vector<Double_t>
     {
@@ -489,10 +481,12 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
     // Shower radius with respect to the event axis, which was obtained from 3-dimensional fitting of all the hits (unweighted)
     .Define("shower_radius", [] (const vector<Double_t>& Hit_X, const vector<Double_t>& Hit_Y, const vector<Double_t>& Hit_Z, const vector<Double_t>& Hit_Energy, const Int_t& nhits, const Int_t& hit_layer, const Double_t& COG_X_mean, const Double_t& COG_Y_mean)->Double_t
     {
+        if (nhits == 0)
+            return -1;
         Double_t radius = 0;
-        vector<Double_t> weights(nhits);
         if (hit_layer > 1)
         {
+            vector<Double_t> weights(nhits);
             for (Int_t i = 0; i < nhits; ++i)
                 weights.at(i) = 1;
             Fit3D* fit = new Fit3D(Hit_X, Hit_Y, Hit_Z, weights, nhits);
@@ -510,6 +504,8 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
     // Shower radius with respect to the event axis, which was obtained from 3-dimensional fitting of all the hits (weighted)
     .Define("weighted_radius", [] (const vector<Double_t>& Hit_X, const vector<Double_t>& Hit_Y, const vector<Double_t>& Hit_Z, const vector<Double_t>& Hit_Energy, const Int_t& nhits, const Int_t& hit_layer, const Double_t& COG_X_mean, const Double_t& COG_Y_mean)->Double_t
     {
+        if (nhits == 0)
+            return -1;
         Double_t radius = 0;
         if (hit_layer > 1)
         {
