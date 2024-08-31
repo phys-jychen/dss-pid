@@ -153,22 +153,22 @@ Int_t main(Int_t argc, Char_t* argv[])
         // Signals: (1, 5, 10, 50, 100, 500, 800, 1000) MeV
         // Backgrounds:  en_ecal, en_target, gmm_ecal, gmm_target, pn_target;  inclusive
         const vector<Int_t> mass = { 1, 5, 10, 50, 100, 500, 800, 1000 };    // In MeV
-        const unordered_map<string, pair<Int_t, Double_t>> bkg = { {"en_ecal", {16, 3.25e-6}}, {"en_target", {16, 5.1e-7}}, {"gmm_ecal", {16, 1.63e-6}}, {"gmm_target", {16, 1.5e-8}}, {"pn_target", {16, 1.37e-6}}, {"inclusive", {5, 1.0}} };
+        const unordered_map<string, Double_t> bkg = { {"en_ecal", 3.25e-6}, {"en_target", 5.1e-7}, {"gmm_ecal", 1.63e-6}, {"gmm_target", 1.5e-8}, {"pn_target", 1.37e-6}, {"inclusive", 1.0} };
         const string path = "/lustre/collider/chenjiyuan/dss-pid/run/dp-signal/";
 
         for (const Int_t& i : mass)
         {
-            p->AddTrainSig(path + "signal/root/training/Mass" + to_string(i) + "MeV/Mass" + to_string(i) + "MeV.root", tree, "signal", 1.0);
-            p->AddTestSig( path + "signal/root/test/Mass" + to_string(i) + "MeV/Mass" + to_string(i) + "MeV.root",     tree, "signal", 1.0);
+            p->AddTrainSig(path + "signal/root/training/Mass" + to_string(i) + "MeV/rec_Mass" + to_string(i) + "MeV.root", tree, "signal", 1.0);
+            p->AddTestSig( path + "signal/root/test/Mass" + to_string(i) + "MeV/rec_Mass" + to_string(i) + "MeV.root",     tree, "signal", 1.0);
         }
 
         for (const auto& j : bkg)
-            for (Int_t k = 1; k <= j.second.first; ++k)
-            {
-                const string bkg_path = (j.first == "inclusive") ? "inclusive/root/" : "rare/" + j.first + "/";
-                p->AddTrainSig(path + bkg_path + "training/job" + to_string(k) + "/" + j.first + "_" + to_string(k) + ".root",                               tree, j.first, j.second.second);
-                p->AddTestSig( path + bkg_path + "test/job" + to_string(k + j.second.first) + "/" + j.first + "_" + to_string(k + j.second.first) + ".root", tree, j.first, j.second.second);
-            }
+        {
+            const string bkg_path = (j.first == "inclusive") ? "inclusive/root/" : "rare/" + j.first + "/";
+
+            p->AddTrainSig(path + bkg_path + "training/" + j.first + ".root", tree, j.first, j.second);
+            p->AddTestSig( path + bkg_path + "test/" + j.first + ".root",     tree, j.first, j.second);
+        }
 
         p->TrainBDT();
         delete p;

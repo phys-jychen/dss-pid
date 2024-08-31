@@ -76,6 +76,8 @@ iPID -c -f [file] -t [tree]
 
 Then, the BDT response is stored in the output ROOT file, whose name has a prefix ‘bdt’, in your current directory. While modifying `src/BDT.cxx`, make sure that the input variables are identical to those in `bdt.cxx`, including the order!
 
+Notice: to speed up and reduce memory consumption, remember to combine the ROOT files of every class before running `iPID -b`. This can be done with `hadd`.
+
 ### Printing to CSV
 After the TMVA output file of classification is created, you can plot the ROC (receiver operating characteristic) curves to understand the performance of BDT better. To do so, you have to dump the true positive (TP) values, true negative (TN) values, etc. to make the plot. Execute:
 ```shell
@@ -169,6 +171,10 @@ Added a function to dump the true positive (TP) and true negative (TN) values fo
 - Changed from signal–background separation to multi-class BDT, and added weights for each process. The weights come from [the publication in 2023](https://doi.org/10.1007/s11433-022-1983-8).
 - Removed some variables that are strongly correlated with others.
 - Modified the contents dumped to the CSV file.
+
+### 31 August 2024
+
+Combine the ROOT files of each class before sending into BDT to speed up and reduce memory consumption.
 
 ## Reference
 The framework of this project comes from [ahcal-pid](https://github.com/phys-jychen/ahcal-pid). Since the structures of these detectors are largely different, the definitions of most of the variables have been modified. Besides, the execution has been greatly simplified.
