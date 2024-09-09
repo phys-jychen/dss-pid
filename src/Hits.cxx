@@ -1,28 +1,5 @@
 #include "PID.h"
 
-Int_t PID::SaveBranches(const string& file, const string& tree)
-{
-    string outname = file;
-    outname = outname.substr(outname.find_last_of('/') + 1);
-    outname = "sel_" + outname;
-
-    TFile* f = new TFile((TString) file, "READ");
-    TTree* t = f->Get<TTree>((TString) tree);
-    t->SetBranchStatus("*", false);
-
-    const vector<TString> remains = { "EventNumber", "ECAL_ClusterSub_E", "ECAL_ClusterSub_matchRecTrk", "ECAL_ClusterSub_N", "ECAL_ClusterSub_X", "ECAL_ClusterSub_Y", "ECAL_ClusterSub_Z", "ECAL_Cluster_E", "ECAL_Cluster_N", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z", "ECAL_ECell_XYZ", "RecTrk2_track_No", "RunNumber", "TagTrk2_track_No" };
-    for (const TString& re : remains)
-        t->SetBranchStatus(re, true);
-
-    TFile* fnew = new TFile((TString) outname, "RECREATE");
-    TTree* tnew = t->CloneTree();
-    tnew->Write(nullptr, TObject::kWriteDelete, 0);
-    f->Close();
-    fnew->Close();
-
-    return 0;
-}
-
 Int_t PID::OriginalHits(const string& file, const string& tree)
 {
     DisableImplicitMT();
@@ -30,9 +7,24 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
     string outname = file;
     outname = outname.substr(outname.find_last_of('/') + 1);
     outname = "hit_" + outname;
+
+    const vector<string> columns = { "RunNumber", "EventNumber", "EventID_High", "EventID_Low",    // Run and event ID
+                                     "CellID", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z",    // Hit information
+                                     "Acts_RecTrk_No", "Acts_RecTrk_P0", "Acts_TagTrk_No", "Acts_TagTrk_P0", "Missing2_Trk_P",    // Tracker
+                                     "ECAL_ClusterSub_N", "ECAL_Cluster_N", "clus_10", "clus_10_tot", "clus_20", "clus_20_tot", "clus_sub_10", "clus_sub_20", "clus_sub_match",    // ECAL: cluster number
+                                     "Edep", "Eclus_max", "Eclus_second", "Eclus_max_sec_diff", "Eclus_max_sec_dist",    // ECAL: energy
+                                     "Edep_HCAL", "Ecell_max_HCAL", "Edep_SideHCAL", "Ecell_max_SideHCAL" };    // HCAL
+
     auto fout = dm->Define("ntotal", "(Int_t) ECAL_ECell_XYZ.size()")
     .Define("EventID_High", "(Long_t) EventNumber / 100000")
     .Define("EventID_Low", "(Long_t) EventNumber % 100000")
+    .Define("Acts_TagTrk_P0", "(Acts_TagTrk_P.size() > 0) ? TMath::Abs(Acts_TagTrk_P[0]) : 0")
+    .Define("Acts_RecTrk_P0", "(Acts_RecTrk_P.size() > 0) ? TMath::Abs(Acts_RecTrk_P[0]) : 0")
+    .Define("Missing2_Trk_P", "Acts_TagTrk_P0 - Acts_RecTrk_P0")
+    .Define("Edep_HCAL", "(HCAL_E_total.size() > 0) ? HCAL_E_total[0] : 0")
+    .Define("Edep_SideHCAL", "(SideHCAL_E_total.size() > 0) ? SideHCAL_E_total[0] : 0")
+    .Define("Ecell_max_HCAL", "(HCAL_E_Max_Cell.size() > 0) ? HCAL_E_Max_Cell[0] : 0")
+    .Define("Ecell_max_SideHCAL", "(SideHCAL_E_Max_Cell.size() > 0) ? SideHCAL_E_Max_Cell[0] : 0")
     .Define("Hit_X", [] (const vector<Double_t>& ECAL_ECell_XYZ, const Int_t& ntotal)->vector<Double_t>
     {
         vector<Double_t> Hit_X;
@@ -162,20 +154,8 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
                 --clus_20_tot;
         return clus_20_tot;
     }, {"ECAL_Cluster_E", "ECAL_Cluster_N", "Edep"})
-    .Snapshot(tree, outname);
+    .Snapshot(tree, outname, columns);
     delete dm;
-
-    TFile* f = new TFile((TString) outname, "READ");
-    TTree* t = f->Get<TTree>((TString) tree);
-    t->SetBranchStatus("*", true);
-    const vector<TString> deactivate = { "ECAL_ClusterSub_E", "ECAL_ClusterSub_matchRecTrk", "ECAL_ClusterSub_X", "ECAL_ClusterSub_Y", "ECAL_ClusterSub_Z", "ECAL_Cluster_E", "ECAL_Cluster_X", "ECAL_Cluster_Y", "ECAL_Cluster_Z", "ECAL_ECell_XYZ", "ntotal" };
-    for (const TString& de : deactivate)
-        t->SetBranchStatus(de, false);
-    TFile* fnew = new TFile((TString) outname, "RECREATE");
-    TTree* tnew = t->CloneTree();
-    tnew->Write(nullptr, TObject::kWriteDelete, 0);
-    f->Close();
-    fnew->Close();
 
     return 0;
 }

@@ -27,25 +27,16 @@ for that of energy projection (mind the order of python file name and `-h`!). Fo
 After generating MC samples with `DSimu` in the DarkSHINE simulation framework, assign a large number (e.g. 999999) to the option `RecECAL.Advance` in the configuration file for `DAna`. Then run `DAna`, and the original hit information will be stored in the branch `ECAL_ECell_XYZ`.
 
 ### Selecting Hits
-The desired hit information are in the form of `Hit_X`, `Hit_Y`, etc., which should be converted from `ECAL_ECell_XYZ`. To achieve this, run
+The desired hit information are in the form of `Hit_X`, `Hit_Y`, etc., which should be converted from `ECAL_ECell_XYZ`. Meanwhile, some useful variables from `DAna` should also be kept. To achieve this, run
 ```shell
-iPID -s -f [file]    # 's' stands for 'select'
+iPID -h -f [file]    # 'h' stands for 'hit'
 ```
 if the tree in the original ROOT file has default name `dp`. Otherwise, to specify other tree names, run
 ```shell
-iPID -s -f [file] -t [tree]
-```
-
-After this, an output file whose name has a prefix ‘sel’ is created in your current directory, regardless of where the original ROOT file is. Notice that this step keeps only the branch `ECAL_ECell_XYZ` and some other simple ones, since many other branches lead to failure in collecting original hits!
-
-Next, it is time to store explicit hit information:
-```shell
-iPID -h -f [file]    # 'h' stands for 'hit'
-# Or
 iPID -h -f [file] -t [tree]
 ```
 
-Then, an output file whose name has a prefix ‘hit’ is created in your current directory. Other branches have already been deleted to save space.
+After this, an output file whose name has a prefix ‘hit’ is created in your current directory, regardless of where the original ROOT file is. Other branches have already been deleted to save space.
 
 ### Adding Reconstructed Variables
 In any directory, execute:
@@ -133,48 +124,6 @@ source <build_dir>/setup.sh
 ```
 
 By now, the compilation has finished. Prepare your datasets, and have fun! :relaxed:
-
-## Change Log
-
-### 27 February 2024
-
-Added event display. The staggered structure has been taken into consideration.
-
-### 2 March 2024
-
-Cluster information is saved and used in BDT.
-
-### 10 April 2024
-
-Introduced energy projection to three axes and three planes.
-
-### 18 July 2024
-
-Significant modifications of the definitions.
-
-- The scales of FD are restricted to below the cell number in $x$ and $y$ directions.
-- Some 2D variables have been changed to 3D, e.g. energy ratios, shower radius;
-- Staggered structure has been taken into account, e.g. 3 × 3 cells in the same layer of the hit, but 2 × 2 cells in consecutive layers;
-- The event axis is obtained from 3D linear fitting instead of simply defined as parallel to $z$ axis.
-
-### 22 July 2024
-
-Added a function to dump the true positive (TP) and true negative (TN) values for plotting ROC curves.
-
-### 28 July 2024
-
-- Modified the BDT part to accelerate signal–background BDT.
-- Split the `EventNumber` into two parts, one for storing the 5 lowest digits, and the other for storing the highest digits. This is designed to overcome the shortcomings of TMVA package that spectators are also automatically converted to `float` type.
-
-### 3 August 2024
-
-- Changed from signal–background separation to multi-class BDT, and added weights for each process. The weights come from [the publication in 2023](https://doi.org/10.1007/s11433-022-1983-8).
-- Removed some variables that are strongly correlated with others.
-- Modified the contents dumped to the CSV file.
-
-### 31 August 2024
-
-Combine the ROOT files of each class before sending into BDT to speed up and reduce memory consumption.
 
 ## Reference
 The framework of this project comes from [ahcal-pid](https://github.com/phys-jychen/ahcal-pid). Since the structures of these detectors are largely different, the definitions of most of the variables have been modified. Besides, the execution has been greatly simplified.

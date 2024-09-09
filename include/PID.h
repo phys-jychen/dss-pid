@@ -70,8 +70,6 @@ public:
 
     ~PID() = default;
 
-    static Int_t SaveBranches(const string& file, const string& tree);
-
     static Int_t OriginalHits(const string& file, const string& tree);
 
     static Int_t GenNtuple(const string& file, const string& tree);

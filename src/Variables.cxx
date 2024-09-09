@@ -36,6 +36,22 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
     string outname = file;
     outname = outname.substr(outname.find_last_of('/') + 1);
     outname = "rec_" + outname;
+
+    const vector<string> columns = { "RunNumber", "EventNumber", "EventID_High", "EventID_Low",    // Run and event ID
+                                     "Acts_TagTrk_No", "Acts_TagTrk_P0", "Acts_RecTrk_No", "Acts_RecTrk_P0", "Missing2_Trk_P",    // Tracker
+                                     "ECAL_Cluster_N", "ECAL_ClusterSub_N", "clus_10", "clus_20", "clus_10_tot", "clus_20_tot", "clus_sub_10", "clus_sub_20", "clus_sub_match",    // ECAL: cluster number
+                                     "Eclus_max", "Eclus_second", "Eclus_max_sec_diff", "Eclus_max_sec_dist",    // ECAL: cluster energy
+                                     "Edep_HCAL", "Ecell_max_HCAL", "Edep_SideHCAL", "Ecell_max_SideHCAL",    // HCAL
+                                     "Edep", "nhits", "Emean",    // General information
+                                     "COG_X_mean", "COG_Y_mean", "COG_Z_mean",    // COG
+                                     "Ecell_max", "Ecell_max_3", "Ecell_max_5", "Ecell_max_7", "Ecell_second",   // Max cell
+                                     "Emax_sec_diff", "Emax_sec_dist",    // Max and second cells
+                                     "E1E3", "E1E5", "E1E7", "E3E5", "E3E7", "E1Edep", "E3Edep", "E5Edep", "E7Edep",    // Energy ratios (max cell)
+                                     "Ecentre", "Ecentre_3", "Ecentre_5", "Ecentre_7",    // Event centre
+                                     "E1E3_centre", "E1E5_centre", "E1E7_centre", "E3E5_centre", "E3E7_centre",    // Energy ratios (centre)
+                                     "FD_2D_mean", "FD_2D_rms", "FD_3D_mean", "FD_3D_rms",    // FD
+                                     "hit_layer", "shower_density", "shower_start", "shower_end", "shower_layer", "shower_layer_ratio", "shower_length", "shower_radius", "weighted_radius", "xwidth", "ywidth", "zdepth" };    // Shower topology
+
     auto fout = dm->Define("nhits", "(Int_t) Hit_X.size()")
     // Transfer z position to the layer number
     .Define("layer", [] (const vector<Double_t>& Hit_Z, const Int_t& nhits)->vector<Int_t>
@@ -111,7 +127,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         const Int_t centre_y = round(COG_Y_mean / CellWidthY + nCellsYBias - staggered_y * (0.25 - 0.5 * (centre_z % 2 == 1)));
         centre.at(0) = 10000 * centre_z + 100 * centre_x + centre_y;
         auto itr = find(CellID.begin(), CellID.end(), (Int_t) centre.at(0));
-        const Int_t index = distance(CellID.begin(), itr);
+        const Long_t index = distance(CellID.begin(), itr);
         if (index < CellID.size())
             centre.at(1) = Hit_Energy.at(index);
         return centre;
@@ -143,7 +159,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
                         continue;
                     const Int_t tmp = 10000 * iz + 100 * ix + iy;
                     auto itr = find(CellID.begin(), CellID.end(), tmp);
-                    const Int_t index = distance(CellID.begin(), itr);
+                    const Long_t index = distance(CellID.begin(), itr);
                     if (index >= CellID.size())
                         continue;
                     Ecentre_3 += Hit_Energy.at(index);
@@ -177,7 +193,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
                         continue;
                     const Int_t tmp = 10000 * iz + 100 * ix + iy;
                     auto itr = find(CellID.begin(), CellID.end(), tmp);
-                    const Int_t index = distance(CellID.begin(), itr);
+                    const Long_t index = distance(CellID.begin(), itr);
                     if (index >= CellID.size())
                         continue;
                     Ecentre_5 += Hit_Energy.at(index);
@@ -211,7 +227,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
                         continue;
                     const Int_t tmp = 10000 * iz + 100 * ix + iy;
                     auto itr = find(CellID.begin(), CellID.end(), tmp);
-                    const Int_t index = distance(CellID.begin(), itr);
+                    const Long_t index = distance(CellID.begin(), itr);
                     if (index >= CellID.size())
                         continue;
                     Ecentre_7 += Hit_Energy.at(index);
@@ -324,7 +340,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
                         continue;
                     const Int_t tmp = 10000 * iz + 100 * ix + iy;
                     auto itr = find(CellID.begin(), CellID.end(), tmp);
-                    const Int_t index = distance(CellID.begin(), itr);
+                    const Long_t index = distance(CellID.begin(), itr);
                     if (index >= CellID.size())
                         continue;
                     Ecell_max_3 += Hit_Energy.at(index);
@@ -358,7 +374,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
                         continue;
                     const Int_t tmp = 10000 * iz + 100 * ix + iy;
                     auto itr = find(CellID.begin(), CellID.end(), tmp);
-                    const Int_t index = distance(CellID.begin(), itr);
+                    const Long_t index = distance(CellID.begin(), itr);
                     if (index >= CellID.size())
                         continue;
                     Ecell_max_5 += Hit_Energy.at(index);
@@ -392,7 +408,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
                         continue;
                     const Int_t tmp = 10000 * iz + 100 * ix + iy;
                     auto itr = find(CellID.begin(), CellID.end(), tmp);
-                    const Int_t index = distance(CellID.begin(), itr);
+                    const Long_t index = distance(CellID.begin(), itr);
                     if (index >= CellID.size())
                         continue;
                     Ecell_max_7 += Hit_Energy.at(index);
@@ -639,7 +655,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
     .Define("FD_2D", [] (const vector<Double_t>& Hit_X, const vector<Double_t>& Hit_Y, const vector<Double_t>& Hit_Z, const Int_t& nhits)->vector<Double_t>
     {
         vector<Int_t> scale = { 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20 };
-        const Int_t num = scale.size();
+        const ULong_t num = scale.size();
         vector<Double_t> fd_2d(num);
         vector<Int_t> nhits_new(num);
         for (Int_t i = 0; i < num; ++i)
@@ -658,7 +674,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
     .Define("FD_3D", [] (const vector<Double_t>& Hit_X, const vector<Double_t>& Hit_Y, const vector<Double_t>& Hit_Z, const Int_t& nhits)->vector<Double_t>
     {
         vector<Int_t> scale = { 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20 };
-        const Int_t num = scale.size();
+        const ULong_t num = scale.size();
         vector<Double_t> fd_3d(num);
         vector<Int_t> nhits_new(num);
         for (Int_t i = 0; i < num; ++i)
@@ -713,20 +729,8 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         const Double_t FD_3D_rms = Sqrt(total2 / num);
         return FD_3D_rms;
     }, {"FD_3D"})
-    .Snapshot(tree, outname);
+    .Snapshot(tree, outname, columns);
     delete dm;
-
-    TFile* f = new TFile((TString) outname, "READ");
-    TTree* t = f->Get<TTree>((TString) tree);
-    t->SetBranchStatus("*", true);
-    const vector<TString> deactivate = { "CellID", "Ecell_max_id", "Ecell_second_id", "FD_2D", "FD_3D", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z", "centre", "hits_on_layer", "layer", "layer_energy", "layer_rms", "layer_xwidth", "layer_ywidth" };
-    for (const TString& de : deactivate)
-        t->SetBranchStatus(de, false);
-    TFile* fnew = new TFile((TString) outname, "RECREATE");
-    TTree* tnew = t->CloneTree();
-    tnew->Write(nullptr, TObject::kWriteDelete, 0);
-    f->Close();
-    fnew->Close();
 
     return 0;
 }

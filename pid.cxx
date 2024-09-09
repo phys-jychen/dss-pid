@@ -3,7 +3,7 @@
 Int_t main(Int_t argc, Char_t* argv[])
 {
     string file, tree = "dp";
-    Int_t sel = 0, hit = 0;
+    Int_t hit = 0;
     Int_t rec = 0;
     Int_t bdt = 0, classify = 0;
     Int_t print = 0;
@@ -18,9 +18,6 @@ Int_t main(Int_t argc, Char_t* argv[])
             cout << "****************************************************************" << endl;
             cout << "                        Help information" << endl;
             cout << "****************************************************************" << endl;
-            cout << " Select branches:" << endl;
-            cout << "     With default tree \'dp\':     iPID -s -f [file]" << endl;
-            cout << "     With other specified tree:  iPID -s -f [file] -t [tree]" << endl;
             cout << " Collect original hit information:" << endl;
             cout << "     With default tree \'dp\':     iPID -h -f [file]" << endl;
             cout << "     With other specified tree:  iPID -h -f [file] -t [tree]" << endl;
@@ -44,9 +41,6 @@ Int_t main(Int_t argc, Char_t* argv[])
         else if (string(argv[i]) == string("-t"))
             tree = string(argv[i + 1]);
 
-        else if (string(argv[i]) == string("-s"))
-            sel = 1;
-
         else if (string(argv[i]) == string("-h"))
             hit = 1;
 
@@ -63,16 +57,7 @@ Int_t main(Int_t argc, Char_t* argv[])
             print = 1;
     }
 
-    if (sel == 1 && !file.empty())
-    {
-        cout << "--> Saving branches..." << endl;
-        cout << "--> File: " << file << endl;
-        cout << "--> Tree: " << tree << endl << endl;
-        PID::SaveBranches(file, tree);
-        cout << "--> Branch selection finished!" << endl;
-    }
-
-    else if (hit == 1 && !file.empty())
+    if (hit == 1 && !file.empty())
     {
         cout << "--> Collecting original hits..." << endl;
         cout << "--> File: " << file << endl;
@@ -98,11 +83,11 @@ Int_t main(Int_t argc, Char_t* argv[])
         PID* p = new PID();
 
         // Add spectators, which are not used in training, test or evaluation, here
-        p->AddSpec("EventID_High",     "Event ID (highest few digits)");
-        p->AddSpec("EventID_Low",      "Event ID (lowest 5 digits)");
-        p->AddSpec("RecTrk2_track_No", "Track number in recoil tracker");
-        p->AddSpec("RunNumber",        "Run ID");
-        p->AddSpec("TagTrk2_track_No", "Track number in tagging tracker");
+        p->AddSpec("Acts_RecTrk_No", "Track number in recoil tracker");
+        p->AddSpec("Acts_TagTrk_No", "Track number in tagging tracker");
+        p->AddSpec("EventID_High",   "Event ID (highest few digits)");
+        p->AddSpec("EventID_Low",    "Event ID (lowest 5 digits)");
+        p->AddSpec("RunNumber",      "Run ID");
 
         // Add variables to be trained, tested and evaluated here
         p->AddVar("COG_X_mean",         'D');
@@ -116,7 +101,7 @@ Int_t main(Int_t argc, Char_t* argv[])
         p->AddVar("E3Edep",             'D');
 //        p->AddVar("E5Edep",             'D');
         p->AddVar("E7Edep",             'D');
-        p->AddVar("ECAL_Cluster_N",     'I');
+//        p->AddVar("ECAL_Cluster_N",     'I');
         p->AddVar("Ecell_max",          'D');
         p->AddVar("Ecell_second",       'D');
         p->AddVar("Ecentre",            'D');
@@ -126,7 +111,7 @@ Int_t main(Int_t argc, Char_t* argv[])
         p->AddVar("Eclus_max",          'D');
 //        p->AddVar("Eclus_max_sec_diff", 'D');
         p->AddVar("Eclus_max_sec_dist", 'D');
-        p->AddVar("Eclus_second",       'D');
+//        p->AddVar("Eclus_second",       'D');
         p->AddVar("Edep",               'D');
 //        p->AddVar("Emax_sec_diff",      'D');
         p->AddVar("Emax_sec_dist",      'D');
@@ -136,6 +121,8 @@ Int_t main(Int_t argc, Char_t* argv[])
 //        p->AddVar("FD_2D_rms",          'D');
 //        p->AddVar("FD_3D_mean",         'D');
         p->AddVar("FD_3D_rms",          'D');
+
+        p->AddVar("Missing2_Trk_P",     'D');
 
         p->AddVar("hit_layer",          'I');
         p->AddVar("nhits",              'I');

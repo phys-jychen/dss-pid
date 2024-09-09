@@ -40,7 +40,7 @@ Int_t PID::TrainBDT()
         dataloader->AddSpectator(j.first, j.second);
 
     // Signal and background trees should be added here
-    TCut cut = "nhits > 0 && TagTrk2_track_No == 1 && RecTrk2_track_No == 1";
+    TCut cut = "nhits > 0 && Acts_TagTrk_No == 1 && Acts_RecTrk_No == 1 && Edep_HCAL < 140 && Edep_SideHCAL < 100 && Ecell_max_HCAL < 220 && Ecell_max_SideHCAL < 100";
 
     for (const auto& i : trsig)
         dataloader->AddTree(i.first, i.second.first, i.second.second, cut, TMVA::Types::kTraining);
@@ -87,11 +87,11 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     cout << "==> Start TMVA" << type << "Application" << endl;
     TMVA::Reader* reader = new TMVA::Reader( "!Color:!Silent" );
 
+    Float_t  bdt_Acts_RecTrk_No;
+    Float_t  bdt_Acts_TagTrk_No;
     Float_t  bdt_eventid_high;
     Float_t  bdt_eventid_low;
-    Float_t  bdt_RecTrk2_track_No;
     Float_t  bdt_run_number;
-    Float_t  bdt_TagTrk2_track_No;
 
     Float_t  bdt_COG_X_mean;
     Float_t  bdt_COG_Y_mean;
@@ -104,7 +104,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     Float_t  bdt_E3Edep;
 //    Float_t  bdt_E5Edep;
     Float_t  bdt_E7Edep;
-    Float_t  bdt_ECAL_Cluster_N;
+//    Float_t  bdt_ECAL_Cluster_N;
     Float_t  bdt_Ecell_max;
     Float_t  bdt_Ecell_second;
     Float_t  bdt_Ecentre;
@@ -114,7 +114,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     Float_t  bdt_Eclus_max;
 //    Float_t  bdt_Eclus_max_sec_diff;
     Float_t  bdt_Eclus_max_sec_dist;
-    Float_t  bdt_Eclus_second;
+//    Float_t  bdt_Eclus_second;
     Float_t  bdt_Edep;
 //    Float_t  bdt_Emax_sec_diff;
     Float_t  bdt_Emax_sec_dist;
@@ -124,6 +124,8 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
 //    Float_t  bdt_FD_2D_rms;
 //    Float_t  bdt_FD_3D_mean;
     Float_t  bdt_FD_3D_rms;
+
+    Float_t  bdt_Missing2_Trk_P;
 
     Float_t  bdt_hit_layer;
     Float_t  bdt_nhits;
@@ -137,11 +139,11 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     Float_t  bdt_ywidth;
     Float_t  bdt_zdepth;
 
-    reader->AddSpectator("EventID_High",     &bdt_eventid_high);
-    reader->AddSpectator("EventID_Low",      &bdt_eventid_low);
-    reader->AddSpectator("RecTrk2_track_No", &bdt_RecTrk2_track_No);
-    reader->AddSpectator("RunNumber",        &bdt_run_number);
-    reader->AddSpectator("TagTrk2_track_No", &bdt_TagTrk2_track_No);
+    reader->AddSpectator("Acts_RecTrk_No", &bdt_Acts_RecTrk_No);
+    reader->AddSpectator("Acts_TagTrk_No", &bdt_Acts_TagTrk_No);
+    reader->AddSpectator("EventID_High",   &bdt_eventid_high);
+    reader->AddSpectator("EventID_Low",    &bdt_eventid_low);
+    reader->AddSpectator("RunNumber",      &bdt_run_number);
 
     reader->AddVariable("COG_X_mean",         &bdt_COG_X_mean);
     reader->AddVariable("COG_Y_mean",         &bdt_COG_Y_mean);
@@ -154,7 +156,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     reader->AddVariable("E3Edep",             &bdt_E3Edep);
 //    reader->AddVariable("E5Edep",             &bdt_E5Edep);
     reader->AddVariable("E7Edep",             &bdt_E7Edep);
-    reader->AddVariable("ECAL_Cluster_N",     &bdt_ECAL_Cluster_N);
+//    reader->AddVariable("ECAL_Cluster_N",     &bdt_ECAL_Cluster_N);
     reader->AddVariable("Ecell_max",          &bdt_Ecell_max);
     reader->AddVariable("Ecell_second",       &bdt_Ecell_second);
     reader->AddVariable("Ecentre",            &bdt_Ecentre);
@@ -164,7 +166,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     reader->AddVariable("Eclus_max",          &bdt_Eclus_max);
 //    reader->AddVariable("Eclus_max_sec_diff", &bdt_Eclus_max_sec_diff);
     reader->AddVariable("Eclus_max_sec_dist", &bdt_Eclus_max_sec_dist);
-    reader->AddVariable("Eclus_second",       &bdt_Eclus_second);
+//    reader->AddVariable("Eclus_second",       &bdt_Eclus_second);
     reader->AddVariable("Edep",               &bdt_Edep);
 //    reader->AddVariable("Emax_sec_diff",      &bdt_Emax_sec_diff);
     reader->AddVariable("Emax_sec_dist",      &bdt_Emax_sec_dist);
@@ -174,6 +176,8 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
 //    reader->AddVariable("FD_2D_rms",          &bdt_FD_2D_rms);
 //    reader->AddVariable("FD_3D_mean",         &bdt_FD_3D_mean);
     reader->AddVariable("FD_3D_rms",          &bdt_FD_3D_rms);
+
+    reader->AddVariable("Missing2_Trk_P",     &bdt_Missing2_Trk_P);
 
     reader->AddVariable("hit_layer",          &bdt_hit_layer);
     reader->AddVariable("nhits",              &bdt_nhits);
@@ -202,7 +206,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     rdf_input.emplace_back("E3Edep");
 //    rdf_input.emplace_back("E5Edep");
     rdf_input.emplace_back("E7Edep");
-    rdf_input.emplace_back("ECAL_Cluster_N");
+//    rdf_input.emplace_back("ECAL_Cluster_N");
     rdf_input.emplace_back("Ecell_max");
     rdf_input.emplace_back("Ecell_second");
     rdf_input.emplace_back("Ecentre");
@@ -212,7 +216,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     rdf_input.emplace_back("Eclus_max");
 //    rdf_input.emplace_back("Eclus_max_sec_diff");
     rdf_input.emplace_back("Eclus_max_sec_dist");
-    rdf_input.emplace_back("Eclus_second");
+//    rdf_input.emplace_back("Eclus_second");
     rdf_input.emplace_back("Edep");
 //    rdf_input.emplace_back("Emax_sec_diff");
     rdf_input.emplace_back("Emax_sec_dist");
@@ -222,6 +226,8 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
 //    rdf_input.emplace_back("FD_2D_rms");
 //    rdf_input.emplace_back("FD_3D_mean");
     rdf_input.emplace_back("FD_3D_rms");
+
+    rdf_input.emplace_back("Missing2_Trk_P");
 
     rdf_input.emplace_back("hit_layer");
     rdf_input.emplace_back("nhits");
@@ -247,7 +253,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
          Double_t E3Edep,
 //         Double_t E5Edep,
          Double_t E7Edep,
-         Int_t    ECAL_Cluster_N,
+//         Int_t    ECAL_Cluster_N,
          Double_t Ecell_max,
          Double_t Ecell_second,
          Double_t Ecentre,
@@ -257,7 +263,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
          Double_t Eclus_max,
 //         Double_t Eclus_max_sec_diff,
          Double_t Eclus_max_sec_dist,
-         Double_t Eclus_second,
+//         Double_t Eclus_second,
          Double_t Edep,
 //         Double_t Emax_sec_diff,
          Double_t Emax_sec_dist,
@@ -266,6 +272,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
 //         Double_t FD_2D_rms,
 //         Double_t FD_3D_mean,
          Double_t FD_3D_rms,
+         Double_t Missing2_Trk_P,
          Int_t    hit_layer,
          Int_t    nhits,
          Double_t shower_density,
@@ -292,7 +299,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
         bdt_E3Edep             = E3Edep;
 //        bdt_E5Edep             = E5Edep;
         bdt_E7Edep             = E7Edep;
-        bdt_ECAL_Cluster_N     = ECAL_Cluster_N;
+//        bdt_ECAL_Cluster_N     = ECAL_Cluster_N;
         bdt_Ecell_max          = Ecell_max;
         bdt_Ecell_second       = Ecell_second;
         bdt_Ecentre            = Ecentre;
@@ -302,7 +309,7 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
         bdt_Eclus_max          = Eclus_max;
 //        bdt_Eclus_max_sec_diff = Eclus_max_sec_diff;
         bdt_Eclus_max_sec_dist = Eclus_max_sec_dist;
-        bdt_Eclus_second       = Eclus_second;
+//        bdt_Eclus_second       = Eclus_second;
         bdt_Edep               = Edep;
 //        bdt_Emax_sec_diff      = Emax_sec_diff;
         bdt_Emax_sec_dist      = Emax_sec_dist;
@@ -312,6 +319,8 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
 //        bdt_FD_2D_rms          = FD_2D_rms;
 //        bdt_FD_3D_mean         = FD_3D_mean;
         bdt_FD_3D_rms          = FD_3D_rms;
+
+        bdt_Missing2_Trk_P     = Missing2_Trk_P;
 
         bdt_hit_layer          = hit_layer;
         bdt_nhits              = nhits;

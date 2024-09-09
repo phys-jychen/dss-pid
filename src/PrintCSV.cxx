@@ -7,13 +7,13 @@ Int_t PID::PrintCSV(const string& file)
     d->cd();
     TTree* t = d->Get<TTree>("TestTree");
 
-    const Int_t signal_total = t->GetEntries("classID == 0");
-    const Int_t pn_target_total = t->GetEntries("classID == 1");
-    const Int_t gmm_target_total = t->GetEntries("classID == 2");
-    const Int_t gmm_ecal_total = t->GetEntries("classID == 3");
-    const Int_t en_target_total = t->GetEntries("classID == 4");
-    const Int_t en_ecal_total = t->GetEntries("classID == 5");
-    const Int_t inclusive_total = t->GetEntries("classID == 6");
+    const Long64_t signal_total = t->GetEntries("classID == 0");
+    const Long64_t pn_target_total = t->GetEntries("classID == 1");
+    const Long64_t gmm_target_total = t->GetEntries("classID == 2");
+    const Long64_t gmm_ecal_total = t->GetEntries("classID == 3");
+    const Long64_t en_target_total = t->GetEntries("classID == 4");
+    const Long64_t en_ecal_total = t->GetEntries("classID == 5");
+    const Long64_t inclusive_total = t->GetEntries("classID == 6");
 
     const Int_t nsteps = 1000000;
 
@@ -34,21 +34,22 @@ Int_t PID::PrintCSV(const string& file)
         if (i > 0.001 * nsteps && i < 0.999 * nsteps && (i + 1) % 1000 != 0)
             continue;
 
-        Double_t selection = (Double_t) i / nsteps;
-        Int_t nsig_signal = t->GetEntries("classID == 0 && signal > " + (TString) to_string(selection));
-        Int_t nbkg_signal = t->GetEntries("classID != 0 && signal > " + (TString) to_string(selection));
-        Int_t nsig_pn_target = t->GetEntries("classID == 1 && pn_target > " + (TString) to_string(selection));
-        Int_t nbkg_pn_target = t->GetEntries("classID != 1 && pn_target > " + (TString) to_string(selection));
-        Int_t nsig_gmm_target = t->GetEntries("classID == 2 && gmm_target > " + (TString) to_string(selection));
-        Int_t nbkg_gmm_target = t->GetEntries("classID != 2 && gmm_target > " + (TString) to_string(selection));
-        Int_t nsig_gmm_ecal = t->GetEntries("classID == 3 && gmm_ecal > " + (TString) to_string(selection));
-        Int_t nbkg_gmm_ecal = t->GetEntries("classID != 3 && gmm_ecal > " + (TString) to_string(selection));
-        Int_t nsig_en_target = t->GetEntries("classID == 4 && en_target > " + (TString) to_string(selection));
-        Int_t nbkg_en_target = t->GetEntries("classID != 4 && en_target > " + (TString) to_string(selection));
-        Int_t nsig_en_ecal = t->GetEntries("classID == 5 && en_ecal > " + (TString) to_string(selection));
-        Int_t nbkg_en_ecal = t->GetEntries("classID != 5 && en_ecal > " + (TString) to_string(selection));
-        Int_t nsig_inclusive = t->GetEntries("classID == 6 && inclusive > " + (TString) to_string(selection));
-        Int_t nbkg_inclusive = t->GetEntries("classID != 6 && inclusive > " + (TString) to_string(selection));
+        const Double_t selection = (Double_t) i / nsteps;
+
+        Long64_t nsig_signal = t->GetEntries("classID == 0 && signal > " + (TString) to_string(selection));
+        Long64_t nbkg_signal = t->GetEntries("classID != 0 && signal > " + (TString) to_string(selection));
+        Long64_t nsig_pn_target = t->GetEntries("classID == 1 && pn_target > " + (TString) to_string(selection));
+        Long64_t nbkg_pn_target = t->GetEntries("classID != 1 && pn_target > " + (TString) to_string(selection));
+        Long64_t nsig_gmm_target = t->GetEntries("classID == 2 && gmm_target > " + (TString) to_string(selection));
+        Long64_t nbkg_gmm_target = t->GetEntries("classID != 2 && gmm_target > " + (TString) to_string(selection));
+        Long64_t nsig_gmm_ecal = t->GetEntries("classID == 3 && gmm_ecal > " + (TString) to_string(selection));
+        Long64_t nbkg_gmm_ecal = t->GetEntries("classID != 3 && gmm_ecal > " + (TString) to_string(selection));
+        Long64_t nsig_en_target = t->GetEntries("classID == 4 && en_target > " + (TString) to_string(selection));
+        Long64_t nbkg_en_target = t->GetEntries("classID != 4 && en_target > " + (TString) to_string(selection));
+        Long64_t nsig_en_ecal = t->GetEntries("classID == 5 && en_ecal > " + (TString) to_string(selection));
+        Long64_t nbkg_en_ecal = t->GetEntries("classID != 5 && en_ecal > " + (TString) to_string(selection));
+        Long64_t nsig_inclusive = t->GetEntries("classID == 6 && inclusive > " + (TString) to_string(selection));
+        Long64_t nbkg_inclusive = t->GetEntries("classID != 6 && inclusive > " + (TString) to_string(selection));
 
         num << selection << ","
             << signal_total << "," << nsig_signal << "," << nbkg_signal << ","
