@@ -60,8 +60,8 @@ const Double_t nCellsXBias = 0.5 * (nCellsX - 1);
 const Double_t nCellsYBias = 0.5 * (nCellsY - 1);
 
 // Staggered structure
-const Bool_t staggered_x = true;
-const Bool_t staggered_y = true;
+const Bool_t staggered_x = false;
+const Bool_t staggered_y = false;
 
 class PID
 {

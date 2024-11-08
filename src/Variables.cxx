@@ -38,7 +38,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
     outname = "rec_" + outname;
 
     const vector<string> columns = { "RunNumber", "EventNumber", "EventID_High", "EventID_Low",    // Run and event ID
-                                     "Acts_TagTrk_No", "Acts_TagTrk_P0", "Acts_RecTrk_No", "Acts_RecTrk_P0", "Missing2_Trk_P",    // Tracker
+                                     "TagTrk2_track_No", "TagTrk_P0", "RecTrk2_track_No", "RecTrk_P0", "Missing_P",    // Tracker
                                      "ECAL_Cluster_N", "ECAL_ClusterSub_N", "clus_10", "clus_20", "clus_10_tot", "clus_20_tot", "clus_sub_10", "clus_sub_20", "clus_sub_match",    // ECAL: cluster number
                                      "Eclus_max", "Eclus_second", "Eclus_max_sec_diff", "Eclus_max_sec_dist",    // ECAL: cluster energy
                                      "Edep_HCAL", "Ecell_max_HCAL", "Edep_SideHCAL", "Ecell_max_SideHCAL",    // HCAL

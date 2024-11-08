@@ -83,11 +83,11 @@ Int_t main(Int_t argc, Char_t* argv[])
         PID* p = new PID();
 
         // Add spectators, which are not used in training, test or evaluation, here
-        p->AddSpec("Acts_RecTrk_No", "Track number in recoil tracker");
-        p->AddSpec("Acts_TagTrk_No", "Track number in tagging tracker");
-        p->AddSpec("EventID_High",   "Event ID (highest few digits)");
-        p->AddSpec("EventID_Low",    "Event ID (lowest 5 digits)");
-        p->AddSpec("RunNumber",      "Run ID");
+        p->AddSpec("RecTrk2_track_No", "Track number in recoil tracker");
+        p->AddSpec("TagTrk2_track_No", "Track number in tagging tracker");
+        p->AddSpec("EventID_High",     "Event ID (highest few digits)");
+        p->AddSpec("EventID_Low",      "Event ID (lowest 5 digits)");
+        p->AddSpec("RunNumber",        "Run ID");
 
         // Add variables to be trained, tested and evaluated here
         p->AddVar("COG_X_mean",         'D');
@@ -122,7 +122,7 @@ Int_t main(Int_t argc, Char_t* argv[])
 //        p->AddVar("FD_3D_mean",         'D');
         p->AddVar("FD_3D_rms",          'D');
 
-        p->AddVar("Missing2_Trk_P",     'D');
+        p->AddVar("Missing_P",          'D');
 
         p->AddVar("hit_layer",          'I');
         p->AddVar("nhits",              'I');

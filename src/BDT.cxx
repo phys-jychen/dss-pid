@@ -40,7 +40,7 @@ Int_t PID::TrainBDT()
         dataloader->AddSpectator(j.first, j.second);
 
     // Signal and background trees should be added here
-    TCut cut = "nhits > 0 && Acts_TagTrk_No == 1 && Acts_RecTrk_No == 1 && Edep_HCAL < 140 && Edep_SideHCAL < 100 && Ecell_max_HCAL < 220 && Ecell_max_SideHCAL < 100";
+    TCut cut = "nhits > 0 && TagTrk2_track_No == 1 && RecTrk2_track_No == 1 && Edep_HCAL < 140 && Edep_SideHCAL < 100 && Ecell_max_HCAL < 220 && Ecell_max_SideHCAL < 100";
 
     for (const auto& i : trsig)
         dataloader->AddTree(i.first, i.second.first, i.second.second, cut, TMVA::Types::kTraining);
@@ -87,8 +87,8 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     cout << "==> Start TMVA" << type << "Application" << endl;
     TMVA::Reader* reader = new TMVA::Reader( "!Color:!Silent" );
 
-    Float_t  bdt_Acts_RecTrk_No;
-    Float_t  bdt_Acts_TagTrk_No;
+    Float_t  bdt_RecTrk2_track_No;
+    Float_t  bdt_TagTrk2_track_No;
     Float_t  bdt_eventid_high;
     Float_t  bdt_eventid_low;
     Float_t  bdt_run_number;
@@ -139,11 +139,11 @@ Int_t PID::BDTNtuple(const string& file, const string& tree)
     Float_t  bdt_ywidth;
     Float_t  bdt_zdepth;
 
-    reader->AddSpectator("Acts_RecTrk_No", &bdt_Acts_RecTrk_No);
-    reader->AddSpectator("Acts_TagTrk_No", &bdt_Acts_TagTrk_No);
-    reader->AddSpectator("EventID_High",   &bdt_eventid_high);
-    reader->AddSpectator("EventID_Low",    &bdt_eventid_low);
-    reader->AddSpectator("RunNumber",      &bdt_run_number);
+    reader->AddSpectator("RecTrk2_track_No", &bdt_RecTrk2_track_No);
+    reader->AddSpectator("TagTrk2_track_No", &bdt_TagTrk2_track_No);
+    reader->AddSpectator("EventID_High",     &bdt_eventid_high);
+    reader->AddSpectator("EventID_Low",      &bdt_eventid_low);
+    reader->AddSpectator("RunNumber",        &bdt_run_number);
 
     reader->AddVariable("COG_X_mean",         &bdt_COG_X_mean);
     reader->AddVariable("COG_Y_mean",         &bdt_COG_Y_mean);

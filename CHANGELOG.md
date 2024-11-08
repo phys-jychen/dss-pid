@@ -52,3 +52,8 @@ Combine the ROOT files of each class before sending into BDT to speed up and red
 
 ## 8 November 2024 (Version 2.1.1)
 - Corrected the definition of `Ecentre_3`, `Ecell_max_3`, `shower_density`, etc.
+
+## 8 November 2024 (Version 3.0.0)
+Modified the geometry and BDT for baseline-1 samples. A new branch `baseline1` was created.
+
+Version 3 series will only be stored in the branch `baseline1`.

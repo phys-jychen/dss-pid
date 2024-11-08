@@ -10,7 +10,7 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
 
     const vector<string> columns = { "RunNumber", "EventNumber", "EventID_High", "EventID_Low",    // ID of the run and the event
                                      "CellID", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z",    // Hit information
-                                     "Acts_RecTrk_No", "Acts_RecTrk_P0", "Acts_TagTrk_No", "Acts_TagTrk_P0", "Missing2_Trk_P",    // Tracker
+                                     "TagTrk2_track_No", "TagTrk_P0", "RecTrk2_track_No", "RecTrk_P0", "Missing_P",    // Tracker
                                      "ECAL_ClusterSub_N", "ECAL_Cluster_N", "clus_10", "clus_10_tot", "clus_20", "clus_20_tot", "clus_sub_10", "clus_sub_20", "clus_sub_match",    // ECAL: cluster number
                                      "Edep", "Eclus_max", "Eclus_second", "Eclus_max_sec_diff", "Eclus_max_sec_dist",    // ECAL: energy
                                      "Edep_HCAL", "Ecell_max_HCAL", "Edep_SideHCAL", "Ecell_max_SideHCAL" };    // HCAL
@@ -18,9 +18,9 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
     auto fout = dm->Define("ntotal", "(Int_t) ECAL_ECell_XYZ.size()")
     .Define("EventID_High", "(Long_t) EventNumber / 100000")
     .Define("EventID_Low", "(Long_t) EventNumber % 100000")
-    .Define("Acts_TagTrk_P0", "(Acts_TagTrk_P.size() > 0) ? TMath::Abs(Acts_TagTrk_P[0]) : 0")
-    .Define("Acts_RecTrk_P0", "(Acts_RecTrk_P.size() > 0) ? TMath::Abs(Acts_RecTrk_P[0]) : 0")
-    .Define("Missing2_Trk_P", "Acts_TagTrk_P0 - Acts_RecTrk_P0")
+    .Define("TagTrk_P0", "(TagTrk2_pp.size() > 0) ? TMath::Abs(TagTrk2_pp[0]) : 0")
+    .Define("RecTrk_P0", "(RecTrk2_pp.size() > 0) ? TMath::Abs(RecTrk2_pp[0]) : 0")
+    .Define("Missing_P", "TagTrk_P0 - RecTrk_P0")
     .Define("Edep_HCAL", "(HCAL_E_total.size() > 0) ? HCAL_E_total[0] : 0")
     .Define("Edep_SideHCAL", "(SideHCAL_E_total.size() > 0) ? SideHCAL_E_total[0] : 0")
     .Define("Ecell_max_HCAL", "(HCAL_E_Max_Cell.size() > 0) ? HCAL_E_Max_Cell[0] : 0")
