@@ -49,3 +49,6 @@ Combine the ROOT files of each class before sending into BDT to speed up and red
 - Simplified the selection process, i.e. removed `iPID -s`.
 - Added more variables from other sub-detectors for BDT.
 - To-do: check the selection criteria of HCAL energy terms.
+
+## 8 November 2024 (Version 2.1.1)
+- Corrected the definition of `Ecentre_3`, `Ecell_max_3`, `shower_density`, etc.

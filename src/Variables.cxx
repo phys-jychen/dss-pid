@@ -146,9 +146,9 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
             if (iz < 0 || iz >= nLayer)
                 continue;
             const Int_t x_begin = x - 1 + (z % 2 == 0) * (iz != z) * staggered_x;
-            const Int_t x_end = x + 1 - (z % 2 == 0) * (iz != z) * staggered_x;
+            const Int_t x_end = x + 1 - (z % 2 == 1) * (iz != z) * staggered_x;
             const Int_t y_begin = y - 1 + (z % 2 == 0) * (iz != z) * staggered_y;
-            const Int_t y_end = y + 1 - (z % 2 == 0) * (iz != z) * staggered_y;
+            const Int_t y_end = y + 1 - (z % 2 == 1) * (iz != z) * staggered_y;
             for (Int_t ix = x_begin; ix <= x_end; ++ix)
             {
                 if (ix < 0 || ix >= nCellsX)
@@ -179,10 +179,10 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         {
             if (iz < 0 || iz >= nLayer)
                 continue;
-            const Int_t x_begin = x - 2 + (z % 2 == 0) * (iz != z) * staggered_x;
-            const Int_t x_end = x + 2 - (z % 2 == 0) * (iz != z) * staggered_x;
-            const Int_t y_begin = y - 2 + (z % 2 == 0) * (iz != z) * staggered_y;
-            const Int_t y_end = y + 2 - (z % 2 == 0) * (iz != z) * staggered_y;
+            const Int_t x_begin = x - 2 + (z % 2 == 0) * ((iz - z) % 2 == 1) * staggered_x;
+            const Int_t x_end = x + 2 - (z % 2 == 1) * ((iz - z) % 2 == 1) * staggered_x;
+            const Int_t y_begin = y - 2 + (z % 2 == 0) * ((iz - z) % 2 == 1) * staggered_y;
+            const Int_t y_end = y + 2 - (z % 2 == 1) * ((iz - z) % 2 == 1) * staggered_y;
             for (Int_t ix = x_begin; ix <= x_end; ++ix)
             {
                 if (ix < 0 || ix >= nCellsX)
@@ -213,10 +213,10 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         {
             if (iz < 0 || iz >= nLayer)
                 continue;
-            const Int_t x_begin = x - 3 + (z % 2 == 0) * (iz != z) * staggered_x;
-            const Int_t x_end = x + 3 - (z % 2 == 0) * (iz != z) * staggered_x;
-            const Int_t y_begin = y - 3 + (z % 2 == 0) * (iz != z) * staggered_y;
-            const Int_t y_end = y + 3 - (z % 2 == 0) * (iz != z) * staggered_y;
+            const Int_t x_begin = x - 3 + (z % 2 == 0) * ((iz - z) % 2 == 1) * staggered_x;
+            const Int_t x_end = x + 3 - (z % 2 == 1) * ((iz - z) % 2 == 1) * staggered_x;
+            const Int_t y_begin = y - 3 + (z % 2 == 0) * ((iz - z) % 2 == 1) * staggered_y;
+            const Int_t y_end = y + 3 - (z % 2 == 1) * ((iz - z) % 2 == 1) * staggered_y;
             for (Int_t ix = x_begin; ix <= x_end; ++ix)
             {
                 if (ix < 0 || ix >= nCellsX)
@@ -327,9 +327,9 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
             if (iz < 0 || iz >= nLayer)
                 continue;
             const Int_t x_begin = x - 1 + (z % 2 == 0) * (iz != z) * staggered_x;
-            const Int_t x_end = x + 1 - (z % 2 == 0) * (iz != z) * staggered_x;
+            const Int_t x_end = x + 1 - (z % 2 == 1) * (iz != z) * staggered_x;
             const Int_t y_begin = y - 1 + (z % 2 == 0) * (iz != z) * staggered_y;
-            const Int_t y_end = y + 1 - (z % 2 == 0) * (iz != z) * staggered_y;
+            const Int_t y_end = y + 1 - (z % 2 == 1) * (iz != z) * staggered_y;
             for (Int_t ix = x_begin; ix <= x_end; ++ix)
             {
                 if (ix < 0 || ix >= nCellsX)
@@ -357,30 +357,24 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         const Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
         const Int_t z = (Int_t) Ecell_max_id.at(0) / 10000;
         for (Int_t iz = z - 2; iz <= z + 2; ++iz)
-        {
-            if (iz < 0 || iz >= nLayer)
-                continue;
-            const Int_t x_begin = x - 2 + (z % 2 == 0) * (iz != z) * staggered_x;
-            const Int_t x_end = x + 2 - (z % 2 == 0) * (iz != z) * staggered_x;
-            const Int_t y_begin = y - 2 + (z % 2 == 0) * (iz != z) * staggered_y;
-            const Int_t y_end = y + 2 - (z % 2 == 0) * (iz != z) * staggered_y;
-            for (Int_t ix = x_begin; ix <= x_end; ++ix)
+            if (iz >= 0 && iz < nLayer)
             {
-                if (ix < 0 || ix >= nCellsX)
-                    continue;
-                for (Int_t iy = y_begin; iy <= y_end; ++iy)
-                {
-                    if (iy < 0 || iy >= nCellsY)
-                        continue;
-                    const Int_t tmp = 10000 * iz + 100 * ix + iy;
-                    auto itr = find(CellID.begin(), CellID.end(), tmp);
-                    const Long_t index = distance(CellID.begin(), itr);
-                    if (index >= CellID.size())
-                        continue;
-                    Ecell_max_5 += Hit_Energy.at(index);
-                }
+                const Int_t x_begin = x - 2 + (z % 2 == 0) * ((iz - z) % 2 == 1) * staggered_x;
+                const Int_t x_end = x + 2 - (z % 2 == 1) * ((iz - z) % 2 == 1) * staggered_x;
+                const Int_t y_begin = y - 2 + (z % 2 == 0) * ((iz - z) % 2 == 1) * staggered_y;
+                const Int_t y_end = y + 2 - (z % 2 == 1) * ((iz - z) % 2 == 1) * staggered_y;
+                for (Int_t ix = x_begin; ix <= x_end; ++ix)
+                    if (ix >= 0 && ix < nCellsX)
+                        for (Int_t iy = y_begin; iy <= y_end; ++iy)
+                            if (iy >= 0 && iy < nCellsY)
+                            {
+                                const Int_t tmp = 10000 * iz + 100 * ix + iy;
+                                auto itr = find(CellID.begin(), CellID.end(), tmp);
+                                const Long_t index = distance(CellID.begin(), itr);
+                                if (index < CellID.size())
+                                    Ecell_max_5 += Hit_Energy.at(index);
+                            }
             }
-        }
         return Ecell_max_5;
     }, {"CellID", "Hit_Energy", "Ecell_max_id"})
     // The energy deposition in the 7*7*7 cells around the one with maximum energy deposition
@@ -391,30 +385,24 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         const Int_t y = (Int_t) Ecell_max_id.at(0) % 100;
         const Int_t z = (Int_t) Ecell_max_id.at(0) / 10000;
         for (Int_t iz = z - 3; iz <= z + 3; ++iz)
-        {
-            if (iz < 0 || iz >= nLayer)
-                continue;
-            const Int_t x_begin = x - 3 + (z % 2 == 0) * (iz != z) * staggered_x;
-            const Int_t x_end = x + 3 - (z % 2 == 0) * (iz != z) * staggered_x;
-            const Int_t y_begin = y - 3 + (z % 2 == 0) * (iz != z) * staggered_y;
-            const Int_t y_end = y + 3 - (z % 2 == 0) * (iz != z) * staggered_y;
-            for (Int_t ix = x_begin; ix <= x_end; ++ix)
+            if (iz >= 0 && iz < nLayer)
             {
-                if (ix < 0 || ix >= nCellsX)
-                    continue;
-                for (Int_t iy = y_begin; iy <= y_end; ++iy)
-                {
-                    if (iy < 0 || iy >= nCellsY)
-                        continue;
-                    const Int_t tmp = 10000 * iz + 100 * ix + iy;
-                    auto itr = find(CellID.begin(), CellID.end(), tmp);
-                    const Long_t index = distance(CellID.begin(), itr);
-                    if (index >= CellID.size())
-                        continue;
-                    Ecell_max_7 += Hit_Energy.at(index);
-                }
+                const Int_t x_begin = x - 3 + (z % 2 == 0) * ((iz - z) % 2 == 1) * staggered_x;
+                const Int_t x_end = x + 3 - (z % 2 == 1) * ((iz - z) % 2 == 1) * staggered_x;
+                const Int_t y_begin = y - 3 + (z % 2 == 0) * ((iz - z) % 2 == 1) * staggered_y;
+                const Int_t y_end = y + 3 - (z % 2 == 1) * ((iz - z) % 2 == 1) * staggered_y;
+                for (Int_t ix = x_begin; ix <= x_end; ++ix)
+                    if (ix >= 0 && ix < nCellsX)
+                        for (Int_t iy = y_begin; iy <= y_end; ++iy)
+                            if (iy >= 0 && iy < nCellsY)
+                            {
+                                const Int_t tmp = 10000 * iz + 100 * ix + iy;
+                                auto itr = find(CellID.begin(), CellID.end(), tmp);
+                                const Long_t index = distance(CellID.begin(), itr);
+                                if (index < CellID.size())
+                                    Ecell_max_7 += Hit_Energy.at(index);
+                            }
             }
-        }
         return Ecell_max_7;
     }, {"CellID", "Hit_Energy", "Ecell_max_id"})
     // Energy deposition of the cell with maximum energy deposition, divided by the total energy deposition in the 3*3*3, 5*5*5 or 7*7*7 cells around it
@@ -445,10 +433,7 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
         }
         for (Int_t i = 0; i < hvec.size(); ++i)
         {
-            if (hvec.at(i)->GetEntries() < 4)
-                layer_rms.at(i) = 0.0;
-            else
-                layer_rms.at(i) = hvec.at(i)->GetRMS();
+            layer_rms.at(i) = (hvec.at(i)->GetEntries() < 4) ? 0.0 : hvec.at(i)->GetRMS();
             delete hvec.at(i);
         }
         vector<TH2D*>().swap(hvec);
@@ -613,26 +598,21 @@ Int_t PID::GenNtuple(const string& file, const string& tree)
             const Int_t y = CellID.at(j) % 100;
             const Int_t z = CellID.at(j) / 10000;
             for (Int_t iz = z - 1; iz <= z + 1; ++iz)
-            {
-                if (iz < 0 || iz >= nLayer)
-                    continue;
-                const Int_t x_begin = x - 1 + (z % 2 == 0) * (iz != z) * staggered_x;
-                const Int_t x_end = x + 1 - (z % 2 == 0) * (iz != z) * staggered_x;
-                const Int_t y_begin = y - 1 + (z % 2 == 0) * (iz != z) * staggered_y;
-                const Int_t y_end = y + 1 - (z % 2 == 0) * (iz != z) * staggered_y;
-                for (Int_t ix = x_begin; ix <= x_end; ++ix)
+                if (iz >= 0 && iz < nLayer)
                 {
-                    if (ix < 0 || ix >= nCellsX)
-                        continue;
-                    for (Int_t iy = y_begin; iy <= y_end; ++iy)
-                    {
-                        if (iy < 0 || iy >= nCellsY)
-                            continue;
-                        const Int_t tmp = 10000 * iz + 100 * ix + iy;
-                        shower_density += map_CellID[tmp];
-                    }
+                    const Int_t x_begin = x - 1 + (z % 2 == 0) * (iz != z) * staggered_x;
+                    const Int_t x_end = x + 1 - (z % 2 == 1) * (iz != z) * staggered_x;
+                    const Int_t y_begin = y - 1 + (z % 2 == 0) * (iz != z) * staggered_y;
+                    const Int_t y_end = y + 1 - (z % 2 == 1) * (iz != z) * staggered_y;
+                    for (Int_t ix = x_begin; ix <= x_end; ++ix)
+                        if (ix >= 0 && ix < nCellsX)
+                            for (Int_t iy = y_begin; iy <= y_end; ++iy)
+                                if (iy >= 0 && iy < nCellsY)
+                                {
+                                    const Int_t tmp = 10000 * iz + 100 * ix + iy;
+                                    shower_density += map_CellID[tmp];
+                                }
                 }
-            }
         }
         shower_density /= nhits;
         return shower_density;

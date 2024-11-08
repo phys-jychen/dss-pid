@@ -8,7 +8,7 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
     outname = outname.substr(outname.find_last_of('/') + 1);
     outname = "hit_" + outname;
 
-    const vector<string> columns = { "RunNumber", "EventNumber", "EventID_High", "EventID_Low",    // Run and event ID
+    const vector<string> columns = { "RunNumber", "EventNumber", "EventID_High", "EventID_Low",    // ID of the run and the event
                                      "CellID", "Hit_Energy", "Hit_X", "Hit_Y", "Hit_Z",    // Hit information
                                      "Acts_RecTrk_No", "Acts_RecTrk_P0", "Acts_TagTrk_No", "Acts_TagTrk_P0", "Missing2_Trk_P",    // Tracker
                                      "ECAL_ClusterSub_N", "ECAL_Cluster_N", "clus_10", "clus_10_tot", "clus_20", "clus_20_tot", "clus_sub_10", "clus_sub_20", "clus_sub_match",    // ECAL: cluster number
@@ -80,12 +80,8 @@ Int_t PID::OriginalHits(const string& file, const string& tree)
     {
         vector<Double_t> Hit_Energy;
         for (Int_t i = 0; i < ntotal; ++i)
-        {
-            if (ECAL_ECell_XYZ.at(i) <= threshold)
-                continue;
-            else
+            if (ECAL_ECell_XYZ.at(i) > threshold)
                 Hit_Energy.emplace_back(ECAL_ECell_XYZ.at(i));
-        }
         return Hit_Energy;
     }, {"ECAL_ECell_XYZ", "ntotal"})
     .Define("Edep", [] (const vector<Double_t>& Hit_Energy)->Double_t
